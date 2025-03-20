@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { 
@@ -7,7 +8,8 @@ import {
   Bath, 
   ChevronLeft, 
   Phone, 
-  Mail 
+  Mail,
+  Utensils
 } from 'lucide-react';
 import ImageGallery from '../components/ImageGallery';
 import AmenitiesList from '../components/AmenitiesList';
@@ -63,6 +65,10 @@ const PropertyDetail = () => {
         return 'Dormitory';
       case 'shared-house':
         return 'Shared House';
+      case 'shared-apartment':
+        return 'Shared Apartment';
+      case 'single-room':
+        return 'Single Room';
       case 'hostel':
         return 'Hostel';
       default:
@@ -143,10 +149,10 @@ const PropertyDetail = () => {
                 </span>
               </div>
               
-              {property.distanceToCampus && (
+              {property.distanceToLandmark && (
                 <div className="text-muted-foreground flex items-center">
                   <span className="inline-block w-1.5 h-1.5 bg-gray-400 rounded-full mr-2"></span>
-                  <span>{property.distanceToCampus} to campus</span>
+                  <span>{property.distanceToLandmark}</span>
                 </div>
               )}
               
@@ -158,7 +164,7 @@ const PropertyDetail = () => {
           </div>
           
           <div className="mt-4 md:mt-0 flex flex-col items-end">
-            <div className="text-3xl font-bold text-gray-900">${property.price}</div>
+            <div className="text-3xl font-bold text-gray-900">₹{property.price}</div>
             <div className="text-muted-foreground">per month</div>
           </div>
         </div>
@@ -166,7 +172,7 @@ const PropertyDetail = () => {
         {/* Navigation Tabs */}
         <div className="mt-8 border-b border-gray-200">
           <div className="flex overflow-x-auto">
-            {['overview', 'amenities', 'location', 'rules'].map((tab) => (
+            {['overview', 'amenities', 'food', 'location', 'rules'].map((tab) => (
               <button
                 key={tab}
                 className={`whitespace-nowrap px-5 py-3 border-b-2 font-medium text-sm ${
@@ -244,6 +250,54 @@ const PropertyDetail = () => {
                   
                   <AmenitiesList amenities={property.amenities} />
                 </div>
+
+                <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 mb-8">
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-xl font-semibold">Food Menu</h2>
+                    <button 
+                      onClick={() => setActiveTab('food')}
+                      className="text-sm text-primary hover:underline font-medium"
+                    >
+                      View Full Menu
+                    </button>
+                  </div>
+                  
+                  <div className="flex items-center gap-2 mb-4 text-primary">
+                    <Utensils className="h-5 w-5" />
+                    <span className="font-medium">Daily Meals Included</span>
+                  </div>
+                  
+                  <p className="text-muted-foreground mb-4">
+                    Enjoy home-cooked fresh meals prepared daily. Our weekly menu is designed to provide balanced nutrition with a variety of Indian dishes.
+                  </p>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="bg-primary/5 p-4 rounded-lg">
+                      <h3 className="font-medium mb-2">Breakfast</h3>
+                      <ul className="text-sm space-y-1 text-muted-foreground">
+                        <li>• Poha / Upma / Paratha</li>
+                        <li>• Tea / Coffee</li>
+                        <li>• Seasonal Fruit</li>
+                      </ul>
+                    </div>
+                    <div className="bg-primary/5 p-4 rounded-lg">
+                      <h3 className="font-medium mb-2">Lunch</h3>
+                      <ul className="text-sm space-y-1 text-muted-foreground">
+                        <li>• Roti / Rice</li>
+                        <li>• Dal / Sabzi</li>
+                        <li>• Salad / Buttermilk</li>
+                      </ul>
+                    </div>
+                    <div className="bg-primary/5 p-4 rounded-lg">
+                      <h3 className="font-medium mb-2">Dinner</h3>
+                      <ul className="text-sm space-y-1 text-muted-foreground">
+                        <li>• Roti / Rice</li>
+                        <li>• Dal / Paneer</li>
+                        <li>• Seasonal Vegetables</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
                 
                 {property.nearbyPlaces && property.nearbyPlaces.length > 0 && (
                   <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 mb-8">
@@ -268,6 +322,66 @@ const PropertyDetail = () => {
                 <AmenitiesList amenities={property.amenities} showAll={true} />
               </div>
             )}
+
+            {/* Food Menu Tab */}
+            {activeTab === 'food' && property.foodMenu && (
+              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 mb-8">
+                <h2 className="text-xl font-semibold mb-4">Weekly Food Menu</h2>
+                <p className="text-muted-foreground mb-6">
+                  Our meal plan includes breakfast, lunch, and dinner all 7 days of the week. All meals are prepared fresh using quality ingredients.
+                </p>
+                
+                <div className="space-y-6">
+                  {Object.entries(property.foodMenu).map(([day, meals]) => (
+                    <div key={day} className="border border-gray-100 rounded-lg p-4">
+                      <h3 className="font-semibold mb-3 text-primary capitalize">{day}</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <h4 className="font-medium mb-2">Breakfast</h4>
+                          <ul className="text-sm space-y-1 text-muted-foreground">
+                            {meals.breakfast.map((item, index) => (
+                              <li key={index} className="flex items-start">
+                                <span className="mr-2">•</span>
+                                <span>{item}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div>
+                          <h4 className="font-medium mb-2">Lunch</h4>
+                          <ul className="text-sm space-y-1 text-muted-foreground">
+                            {meals.lunch.map((item, index) => (
+                              <li key={index} className="flex items-start">
+                                <span className="mr-2">•</span>
+                                <span>{item}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div>
+                          <h4 className="font-medium mb-2">Dinner</h4>
+                          <ul className="text-sm space-y-1 text-muted-foreground">
+                            {meals.dinner.map((item, index) => (
+                              <li key={index} className="flex items-start">
+                                <span className="mr-2">•</span>
+                                <span>{item}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-6 bg-yellow-50 border border-yellow-100 rounded-lg p-4">
+                  <h3 className="font-medium text-yellow-800 mb-2">Special Dietary Requirements</h3>
+                  <p className="text-sm text-yellow-700">
+                    We can accommodate specific dietary requirements with advance notice. Please discuss your needs with the property manager.
+                  </p>
+                </div>
+              </div>
+            )}
             
             {/* Location Tab */}
             {activeTab === 'location' && (
@@ -288,7 +402,7 @@ const PropertyDetail = () => {
                   </p>
                 </div>
                 
-                {property.distanceToCampus && (
+                {property.distanceToLandmark && (
                   <div className="mt-4 pt-4 border-t border-gray-100">
                     <h3 className="font-medium text-lg mb-3">Distance to Key Locations</h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -297,8 +411,8 @@ const PropertyDetail = () => {
                           <MapPin className="h-5 w-5 text-primary" />
                         </div>
                         <div>
-                          <p className="font-medium">University Campus</p>
-                          <p className="text-sm text-muted-foreground">{property.distanceToCampus}</p>
+                          <p className="font-medium">{property.distanceToLandmark.split(" to ")[1]}</p>
+                          <p className="text-sm text-muted-foreground">{property.distanceToLandmark}</p>
                         </div>
                       </div>
                     </div>
@@ -348,13 +462,13 @@ const PropertyDetail = () => {
                 >
                   <Phone className="h-4 w-4 mr-2" />
                   {showPhoneNumber 
-                    ? (property.contactInfo?.phone || '(555) 123-4567') 
+                    ? (property.contactInfo?.phone || '+91 98765 43210') 
                     : 'Show Phone Number'
                   }
                 </button>
                 
                 <a 
-                  href={`mailto:${property.contactInfo?.email || 'info@studentstay.com'}`}
+                  href={`mailto:${property.contactInfo?.email || 'info@stayhome.com'}`}
                   className="w-full py-3 px-4 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center"
                 >
                   <Mail className="h-4 w-4 mr-2" />
@@ -394,7 +508,7 @@ const PropertyDetail = () => {
               {/* Additional Information */}
               <div className="mt-6 pt-6 border-t border-gray-100">
                 <p className="text-sm text-muted-foreground">
-                  This property is listed and verified on StudentStay. We recommend that you schedule a viewing before making any payments.
+                  This property is listed and verified on StayHome. We recommend that you schedule a viewing before making any payments.
                 </p>
               </div>
             </div>
@@ -424,4 +538,3 @@ const PropertyDetail = () => {
 };
 
 export default PropertyDetail;
-

@@ -3,7 +3,7 @@ export interface Property {
   id: string;
   name: string;
   description: string;
-  type: 'student-housing' | 'pg' | 'dormitory' | 'shared-house' | 'hostel';
+  type: 'pg' | 'hostel' | 'shared-apartment' | 'single-room' | 'dormitory';
   price: number;
   location: {
     address: string;
@@ -25,8 +25,17 @@ export interface Property {
   photos: string[];
   rating?: number;
   reviews?: number;
-  distanceToCampus?: string;
+  distanceToLandmark?: string;
   nearbyPlaces?: string[];
+  foodMenu?: {
+    monday: MealPlan;
+    tuesday: MealPlan;
+    wednesday: MealPlan;
+    thursday: MealPlan;
+    friday: MealPlan;
+    saturday: MealPlan;
+    sunday: MealPlan;
+  };
   contactInfo?: {
     name: string;
     email: string;
@@ -35,6 +44,12 @@ export interface Property {
   };
   availability?: Date;
   featured?: boolean;
+}
+
+export interface MealPlan {
+  breakfast: string[];
+  lunch: string[];
+  dinner: string[];
 }
 
 export interface Amenity {

@@ -1,742 +1,711 @@
 
 import React, { useState } from 'react';
 import { 
-  Loader2, Upload, X, Check 
-} from 'lucide-react';
-import { toast } from 'sonner';
-import { 
-  AMENITIES, 
-  PROPERTY_TYPES, 
-  ROOM_TYPES, 
-  GENDER_POLICIES 
-} from '../lib/data';
+  Button, 
+  Card, 
+  CardContent, 
+  Form, 
+  FormControl, 
+  FormField, 
+  FormItem, 
+  FormLabel, 
+  FormMessage, 
+  Input, 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue, 
+  Textarea, 
+  Checkbox
+} from "@/components/ui";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { PROPERTY_TYPES, ROOM_TYPES, GENDER_POLICIES, AMENITIES } from '../lib/data';
+import { PropertyFormData } from '@/lib/types';
+
+const formSchema = z.object({
+  name: z.string().min(2, { message: "Property name is required" }),
+  type: z.string().min(1, { message: "Property type is required" }),
+  price: z.string().min(1, { message: "Price is required" }),
+  address: z.string().min(2, { message: "Address is required" }),
+  city: z.string().min(2, { message: "City is required" }),
+  state: z.string().min(2, { message: "State is required" }),
+  zipCode: z.string().min(2, { message: "Zip code is required" }),
+  roomType: z.string().min(1, { message: "Room type is required" }),
+  bedrooms: z.string().min(1, { message: "Number of bedrooms is required" }),
+  bathrooms: z.string().min(1, { message: "Number of bathrooms is required" }),
+  genderPolicy: z.string().min(1, { message: "Gender policy is required" }),
+  maxOccupancy: z.string().min(1, { message: "Max occupancy is required" }),
+  roomSize: z.string().min(1, { message: "Room size is required" }),
+  amenities: z.array(z.string()).min(1, { message: "Select at least one amenity" }),
+  rules: z.array(z.string()),
+  description: z.string().min(20, { message: "Detailed description is required" }),
+  contactName: z.string().min(2, { message: "Contact name is required" }),
+  contactEmail: z.string().email({ message: "Valid email is required" }),
+  contactPhone: z.string().min(10, { message: "Valid phone number is required" }),
+  termsAccepted: z.boolean().refine(val => val === true, { message: "You must accept the terms" })
+});
 
 interface ListingFormProps {
-  onSubmit: (data: any) => void;
+  onSubmit: (data: PropertyFormData) => void;
 }
 
 const ListingForm: React.FC<ListingFormProps> = ({ onSubmit }) => {
   const [currentStep, setCurrentStep] = useState(1);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    type: '',
-    price: '',
-    location: {
+  const [photos, setPhotos] = useState<File[]>([]);
+  const [rules, setRules] = useState<string[]>([]);
+  const [newRule, setNewRule] = useState('');
+  
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: '',
+      type: '',
+      price: '',
       address: '',
-      city: 'Boston',
-      state: 'MA',
+      city: 'Ahmedabad',
+      state: 'Gujarat',
       zipCode: '',
-      coordinates: [42.3601, -71.0589] as [number, number]
-    },
-    roomDetails: {
       roomType: '',
       bedrooms: '',
       bathrooms: '',
       genderPolicy: '',
       maxOccupancy: '',
-      roomSize: ''
-    },
-    amenities: [] as string[],
-    rules: [] as string[],
-    photos: [] as string[],
-    contactInfo: {
-      name: '',
-      email: '',
-      phone: '',
+      roomSize: '',
+      amenities: [],
+      rules: [],
+      description: '',
+      contactName: '',
+      contactEmail: '',
+      contactPhone: '',
+      termsAccepted: false
     }
   });
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    
-    if (name.includes('.')) {
-      const [section, field] = name.split('.');
-      setFormData(prev => ({
-        ...prev,
-        [section]: {
-          ...prev[section as keyof typeof prev],
-          [field]: value
-        }
-      }));
-    } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
-    }
-  };
-
-  const handleAmenityToggle = (amenityId: string) => {
-    setFormData(prev => {
-      if (prev.amenities.includes(amenityId)) {
-        return {
-          ...prev,
-          amenities: prev.amenities.filter(id => id !== amenityId)
-        };
-      } else {
-        return {
-          ...prev,
-          amenities: [...prev.amenities, amenityId]
-        };
-      }
-    });
-  };
-
-  const handleRuleAdd = (rule: string) => {
-    if (rule.trim() !== '') {
-      setFormData(prev => ({
-        ...prev,
-        rules: [...prev.rules, rule.trim()]
-      }));
-    }
-  };
-
-  const handleRuleRemove = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      rules: prev.rules.filter((_, i) => i !== index)
-    }));
-  };
-
-  const handlePhotoAdd = (photoUrl: string) => {
-    if (photoUrl.trim() !== '') {
-      setFormData(prev => ({
-        ...prev,
-        photos: [...prev.photos, photoUrl.trim()]
-      }));
-    }
-  };
-
-  const handlePhotoRemove = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      photos: prev.photos.filter((_, i) => i !== index)
-    }));
-  };
-
-  const handleFormSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false);
-      onSubmit(formData);
-    }, 1500);
-  };
 
   const steps = [
     { id: 1, name: 'Basic Info' },
     { id: 2, name: 'Room Details' },
     { id: 3, name: 'Amenities & Rules' },
-    { id: 4, name: 'Photos & Contact' },
-    { id: 5, name: 'Review' }
+    { id: 4, name: 'Photos' },
+    { id: 5, name: 'Food Menu' },
+    { id: 6, name: 'Contact Info' }
   ];
 
-  const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, steps.length));
-  const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setPhotos([...photos, ...Array.from(e.target.files)]);
+    }
+  };
+
+  const handleRuleAdd = () => {
+    if (newRule.trim()) {
+      setRules([...rules, newRule.trim()]);
+      setNewRule('');
+    }
+  };
+
+  const handleRuleRemove = (index: number) => {
+    setRules(rules.filter((_, i) => i !== index));
+  };
+
+  const goToNextStep = () => {
+    const fieldsToValidate: Record<number, string[]> = {
+      1: ['name', 'type', 'price', 'address', 'city', 'state', 'zipCode', 'description'],
+      2: ['roomType', 'bedrooms', 'bathrooms', 'genderPolicy', 'maxOccupancy', 'roomSize'],
+      3: ['amenities'],
+      5: ['contactName', 'contactEmail', 'contactPhone', 'termsAccepted']
+    };
+
+    const currentFields = fieldsToValidate[currentStep];
+    
+    if (currentFields) {
+      form.trigger(currentFields as any).then(isValid => {
+        if (isValid) setCurrentStep(prev => prev + 1);
+      });
+    } else {
+      setCurrentStep(prev => prev + 1);
+    }
+  };
+
+  const goToPreviousStep = () => {
+    setCurrentStep(prev => prev - 1);
+  };
+
+  const handleSubmitForm = (values: z.infer<typeof formSchema>) => {
+    const formData: PropertyFormData = {
+      name: values.name,
+      type: values.type,
+      price: values.price,
+      location: {
+        address: values.address,
+        city: values.city,
+        state: values.state,
+        zipCode: values.zipCode,
+      },
+      roomDetails: {
+        roomType: values.roomType,
+        bedrooms: values.bedrooms,
+        bathrooms: values.bathrooms,
+        genderPolicy: values.genderPolicy,
+        maxOccupancy: values.maxOccupancy,
+        roomSize: values.roomSize,
+      },
+      amenities: values.amenities,
+      rules: rules,
+      photos: photos,
+      description: values.description,
+      contactInfo: {
+        name: values.contactName,
+        email: values.contactEmail,
+        phone: values.contactPhone,
+      },
+      termsAccepted: values.termsAccepted
+    };
+
+    onSubmit(formData);
+  };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6 md:p-8">
-      {/* Progress Steps */}
-      <div className="mb-8 overflow-x-auto">
-        <div className="flex min-w-max">
-          {steps.map((step, index) => (
+    <div className="space-y-8">
+      <div className="mb-8 bg-white rounded-lg shadow-sm p-4">
+        <div className="flex justify-between items-center">
+          {steps.map((step) => (
             <div key={step.id} className="flex items-center">
-              <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                  currentStep >= step.id ? 'bg-primary text-white' : 'bg-gray-200 text-gray-600'
-                }`}
-              >
-                {currentStep > step.id ? <Check className="h-4 w-4" /> : step.id}
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                currentStep >= step.id ? 'bg-primary text-white' : 'bg-gray-200 text-gray-600'
+              }`}>
+                {step.id}
               </div>
               <div className="ml-2">
-                <p className={`text-sm font-medium ${currentStep >= step.id ? 'text-gray-900' : 'text-gray-500'}`}>
-                  {step.name}
-                </p>
+                <p className="text-sm font-medium text-gray-900">{step.name}</p>
               </div>
-              {index < steps.length - 1 && (
-                <div className="w-16 sm:w-24 h-px bg-gray-200 mx-2 sm:mx-4"></div>
+              {step.id !== steps.length && (
+                <div className="w-12 h-px bg-gray-200 mx-2"></div>
               )}
             </div>
           ))}
         </div>
       </div>
 
-      <form onSubmit={handleFormSubmit}>
-        {/* Step 1: Basic Info */}
-        {currentStep === 1 && (
-          <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-gray-900">Basic Property Information</h2>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Property Name*
-              </label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                required
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Description*
-              </label>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                rows={4}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                required
-              ></textarea>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Property Type*
-                </label>
-                <select
-                  name="type"
-                  value={formData.type}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent cursor-pointer"
-                  required
-                >
-                  <option value="">Select Property Type</option>
-                  {PROPERTY_TYPES.map(type => (
-                    <option key={type.id} value={type.id}>{type.label}</option>
-                  ))}
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Monthly Rent (USD)*
-                </label>
-                <input
-                  type="number"
-                  name="price"
-                  value={formData.price}
-                  onChange={handleChange}
-                  min="0"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  required
-                />
-              </div>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Address*
-              </label>
-              <input
-                type="text"
-                name="location.address"
-                value={formData.location.address}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent mb-3"
-                placeholder="Street Address"
-                required
-              />
-              
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                <div>
-                  <select
-                    name="location.city"
-                    value={formData.location.city}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent cursor-pointer"
-                    required
-                  >
-                    <option value="Boston">Boston</option>
-                    <option value="Cambridge">Cambridge</option>
-                    <option value="Somerville">Somerville</option>
-                  </select>
-                </div>
-                
-                <div>
-                  <select
-                    name="location.state"
-                    value={formData.location.state}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent cursor-pointer"
-                    required
-                  >
-                    <option value="MA">Massachusetts</option>
-                  </select>
-                </div>
-                
-                <div>
-                  <input
-                    type="text"
-                    name="location.zipCode"
-                    value={formData.location.zipCode}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    placeholder="Zip Code"
-                    required
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleSubmitForm)} className="space-y-6">
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-6">
+              {/* Step 1: Basic Info */}
+              {currentStep === 1 && (
+                <div className="space-y-6">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Property Name</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="grid grid-cols-2 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="type"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Property Type</FormLabel>
+                          <Select 
+                            onValueChange={field.onChange} 
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select type" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {PROPERTY_TYPES.map(type => (
+                                <SelectItem key={type.id} value={type.id}>
+                                  {type.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="price"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Monthly Rent (₹)</FormLabel>
+                          <FormControl>
+                            <Input type="number" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name="address"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Street Address</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="grid grid-cols-3 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="city"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>City</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="state"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>State</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="zipCode"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>PIN Code</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Description</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            {...field} 
+                            className="min-h-[120px]" 
+                            placeholder="Provide a detailed description of your property..."
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
                 </div>
-              </div>
-            </div>
-          </div>
-        )}
-        
-        {/* Step 2: Room Details */}
-        {currentStep === 2 && (
-          <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-gray-900">Room Details</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Room Type*
-                </label>
-                <select
-                  name="roomDetails.roomType"
-                  value={formData.roomDetails.roomType}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent cursor-pointer"
-                  required
-                >
-                  <option value="">Select Room Type</option>
-                  {ROOM_TYPES.map(type => (
-                    <option key={type.id} value={type.id}>{type.label}</option>
-                  ))}
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Gender Policy*
-                </label>
-                <select
-                  name="roomDetails.genderPolicy"
-                  value={formData.roomDetails.genderPolicy}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent cursor-pointer"
-                  required
-                >
-                  <option value="">Select Gender Policy</option>
-                  {GENDER_POLICIES.map(policy => (
-                    <option key={policy.id} value={policy.id}>{policy.label}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Bedrooms*
-                </label>
-                <input
-                  type="number"
-                  name="roomDetails.bedrooms"
-                  value={formData.roomDetails.bedrooms}
-                  onChange={handleChange}
-                  min="0"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Bathrooms*
-                </label>
-                <input
-                  type="number"
-                  name="roomDetails.bathrooms"
-                  value={formData.roomDetails.bathrooms}
-                  onChange={handleChange}
-                  min="0"
-                  step="0.5"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Room Size (sq ft)*
-                </label>
-                <input
-                  type="number"
-                  name="roomDetails.roomSize"
-                  value={formData.roomDetails.roomSize}
-                  onChange={handleChange}
-                  min="0"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  required
-                />
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Maximum Occupancy*
-                </label>
-                <input
-                  type="number"
-                  name="roomDetails.maxOccupancy"
-                  value={formData.roomDetails.maxOccupancy}
-                  onChange={handleChange}
-                  min="1"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  required
-                />
-              </div>
-            </div>
-          </div>
-        )}
-        
-        {/* Step 3: Amenities & Rules */}
-        {currentStep === 3 && (
-          <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-gray-900">Amenities & Rules</h2>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Available Amenities
-              </label>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {AMENITIES.map(amenity => (
-                  <label
-                    key={amenity.id}
-                    className={`flex items-center p-3 border rounded-md cursor-pointer transition-colors ${
-                      formData.amenities.includes(amenity.id)
-                        ? 'border-primary bg-primary/5'
-                        : 'border-gray-200 hover:bg-gray-50'
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      className="sr-only"
-                      checked={formData.amenities.includes(amenity.id)}
-                      onChange={() => handleAmenityToggle(amenity.id)}
+              )}
+
+              {/* Step 2: Room Details */}
+              {currentStep === 2 && (
+                <div className="space-y-6">
+                  <div className="grid grid-cols-2 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="roomType"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Room Type</FormLabel>
+                          <Select 
+                            onValueChange={field.onChange} 
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select type" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {ROOM_TYPES.map(type => (
+                                <SelectItem key={type.id} value={type.id}>
+                                  {type.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
-                    <div className="flex items-center">
-                      <div className={`w-5 h-5 flex items-center justify-center rounded-full mr-3 ${
-                        formData.amenities.includes(amenity.id)
-                          ? 'bg-primary text-white'
-                          : 'bg-gray-200'
-                      }`}>
-                        {formData.amenities.includes(amenity.id) && (
-                          <Check className="h-3 w-3" />
-                        )}
+
+                    <FormField
+                      control={form.control}
+                      name="genderPolicy"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Gender Policy</FormLabel>
+                          <Select 
+                            onValueChange={field.onChange} 
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select policy" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {GENDER_POLICIES.map(policy => (
+                                <SelectItem key={policy.id} value={policy.id}>
+                                  {policy.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="bedrooms"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Bedrooms</FormLabel>
+                          <FormControl>
+                            <Input type="number" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="bathrooms"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Bathrooms</FormLabel>
+                          <FormControl>
+                            <Input type="number" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="maxOccupancy"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Max Occupancy</FormLabel>
+                          <FormControl>
+                            <Input type="number" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name="roomSize"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Room Size (sq ft)</FormLabel>
+                        <FormControl>
+                          <Input type="number" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              )}
+
+              {/* Step 3: Amenities & Rules */}
+              {currentStep === 3 && (
+                <div className="space-y-6">
+                  <FormField
+                    control={form.control}
+                    name="amenities"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Amenities</FormLabel>
+                        <div className="grid grid-cols-3 gap-4 mt-2">
+                          {AMENITIES.map(amenity => (
+                            <div key={amenity.id} className="flex items-center space-x-2">
+                              <Checkbox
+                                checked={field.value.includes(amenity.id)}
+                                onCheckedChange={checked => {
+                                  if (checked) {
+                                    field.onChange([...field.value, amenity.id]);
+                                  } else {
+                                    field.onChange(field.value.filter(value => value !== amenity.id));
+                                  }
+                                }}
+                                id={`amenity-${amenity.id}`}
+                              />
+                              <label 
+                                htmlFor={`amenity-${amenity.id}`}
+                                className="text-sm font-medium leading-none cursor-pointer"
+                              >
+                                {amenity.name}
+                              </label>
+                            </div>
+                          ))}
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormItem>
+                    <FormLabel>House Rules</FormLabel>
+                    <div className="flex items-center space-x-2">
+                      <Input
+                        value={newRule}
+                        onChange={e => setNewRule(e.target.value)}
+                        placeholder="Add a house rule"
+                        className="flex-1"
+                      />
+                      <Button 
+                        type="button" 
+                        onClick={handleRuleAdd}
+                        variant="outline"
+                      >
+                        Add Rule
+                      </Button>
+                    </div>
+
+                    {rules.length > 0 && (
+                      <div className="mt-4 space-y-2">
+                        {rules.map((rule, index) => (
+                          <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                            <span>{rule}</span>
+                            <Button 
+                              type="button" 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => handleRuleRemove(index)}
+                            >
+                              Remove
+                            </Button>
+                          </div>
+                        ))}
                       </div>
-                      <span className={`text-sm ${
-                        formData.amenities.includes(amenity.id)
-                          ? 'text-gray-900 font-medium'
-                          : 'text-gray-700'
-                      }`}>
-                        {amenity.name}
-                      </span>
-                    </div>
-                  </label>
-                ))}
-              </div>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                House Rules
-              </label>
-              <div className="flex items-center space-x-2 mb-4">
-                <input
-                  type="text"
-                  id="new-rule"
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  placeholder="Enter a rule (e.g., No smoking)"
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    const input = document.getElementById('new-rule') as HTMLInputElement;
-                    handleRuleAdd(input.value);
-                    input.value = '';
-                  }}
-                  className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90"
-                >
-                  Add
-                </button>
-              </div>
-              
-              {formData.rules.length > 0 ? (
-                <ul className="space-y-2">
-                  {formData.rules.map((rule, index) => (
-                    <li key={index} className="flex items-center justify-between bg-gray-50 px-4 py-2 rounded-md">
-                      <span className="text-gray-700">{rule}</span>
-                      <button
-                        type="button"
-                        onClick={() => handleRuleRemove(index)}
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-gray-500 text-sm italic">No rules added yet.</p>
-              )}
-            </div>
-          </div>
-        )}
-        
-        {/* Step 4: Photos & Contact */}
-        {currentStep === 4 && (
-          <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-gray-900">Photos & Contact Information</h2>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Property Photos
-              </label>
-              <div className="flex items-center space-x-2 mb-4">
-                <input
-                  type="text"
-                  id="new-photo"
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  placeholder="Enter image URL"
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    const input = document.getElementById('new-photo') as HTMLInputElement;
-                    handlePhotoAdd(input.value);
-                    input.value = '';
-                  }}
-                  className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90"
-                >
-                  Add
-                </button>
-              </div>
-              
-              {formData.photos.length > 0 ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {formData.photos.map((photo, index) => (
-                    <div key={index} className="relative group">
-                      <img
-                        src={photo}
-                        alt={`Property ${index + 1}`}
-                        className="w-full h-32 object-cover rounded-md"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => handlePhotoRemove(index)}
-                        className="absolute top-2 right-2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-md opacity-70 hover:opacity-100"
-                      >
-                        <X className="h-4 w-4 text-red-500" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="border-2 border-dashed border-gray-300 rounded-md p-8 text-center">
-                  <Upload className="h-10 w-10 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-500">Add photo URLs to display your property images</p>
+                    )}
+                  </FormItem>
                 </div>
               )}
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Contact Name*
-                </label>
-                <input
-                  type="text"
-                  name="contactInfo.name"
-                  value={formData.contactInfo.name}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Contact Email*
-                </label>
-                <input
-                  type="email"
-                  name="contactInfo.email"
-                  value={formData.contactInfo.email}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Contact Phone*
-                </label>
-                <input
-                  type="tel"
-                  name="contactInfo.phone"
-                  value={formData.contactInfo.phone}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  required
-                />
-              </div>
-            </div>
-          </div>
-        )}
-        
-        {/* Step 5: Review */}
-        {currentStep === 5 && (
-          <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-gray-900">Review Your Listing</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <h3 className="font-medium text-gray-900 mb-2">Basic Information</h3>
-                <div className="bg-gray-50 p-4 rounded-md">
-                  <p><span className="font-medium">Name:</span> {formData.name}</p>
-                  <p><span className="font-medium">Type:</span> {
-                    PROPERTY_TYPES.find(t => t.id === formData.type)?.label || formData.type
-                  }</p>
-                  <p><span className="font-medium">Price:</span> ${formData.price}/month</p>
-                </div>
-              </div>
-              
-              <div>
-                <h3 className="font-medium text-gray-900 mb-2">Location</h3>
-                <div className="bg-gray-50 p-4 rounded-md">
-                  <p>{formData.location.address}</p>
-                  <p>{formData.location.city}, {formData.location.state} {formData.location.zipCode}</p>
-                </div>
-              </div>
-              
-              <div>
-                <h3 className="font-medium text-gray-900 mb-2">Room Details</h3>
-                <div className="bg-gray-50 p-4 rounded-md">
-                  <p><span className="font-medium">Room Type:</span> {
-                    ROOM_TYPES.find(t => t.id === formData.roomDetails.roomType)?.label || formData.roomDetails.roomType
-                  }</p>
-                  <p><span className="font-medium">Gender Policy:</span> {
-                    GENDER_POLICIES.find(p => p.id === formData.roomDetails.genderPolicy)?.label || formData.roomDetails.genderPolicy
-                  }</p>
-                  <p><span className="font-medium">Size:</span> {formData.roomDetails.roomSize} sq ft</p>
-                  <p><span className="font-medium">Bedrooms:</span> {formData.roomDetails.bedrooms}</p>
-                  <p><span className="font-medium">Bathrooms:</span> {formData.roomDetails.bathrooms}</p>
-                </div>
-              </div>
-              
-              <div>
-                <h3 className="font-medium text-gray-900 mb-2">Amenities</h3>
-                <div className="bg-gray-50 p-4 rounded-md">
-                  {formData.amenities.length > 0 ? (
-                    <div className="flex flex-wrap gap-2">
-                      {formData.amenities.map(amenityId => {
-                        const amenity = AMENITIES.find(a => a.id === amenityId);
-                        return amenity ? (
-                          <span key={amenityId} className="bg-primary/10 text-primary px-2 py-1 rounded-md text-sm">
-                            {amenity.name}
-                          </span>
-                        ) : null;
-                      })}
-                    </div>
-                  ) : (
-                    <p className="text-gray-500 italic">No amenities selected</p>
-                  )}
-                </div>
-              </div>
-              
-              {formData.photos.length > 0 && (
-                <div className="col-span-1 md:col-span-2">
-                  <h3 className="font-medium text-gray-900 mb-2">Photos</h3>
-                  <div className="grid grid-cols-3 md:grid-cols-4 gap-4">
-                    {formData.photos.map((photo, index) => (
-                      <img
-                        key={index}
-                        src={photo}
-                        alt={`Property ${index + 1}`}
-                        className="w-full h-24 object-cover rounded-md"
+
+              {/* Step 4: Photos */}
+              {currentStep === 4 && (
+                <div className="space-y-6">
+                  <FormItem>
+                    <FormLabel>Property Photos</FormLabel>
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                      <input
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        className="hidden"
+                        id="photo-upload"
+                        onChange={handleFileChange}
                       />
+                      <label htmlFor="photo-upload" className="cursor-pointer block">
+                        <div className="text-4xl text-gray-400 mb-4">📷</div>
+                        <p className="text-gray-600">Drag and drop your photos here, or click to select files</p>
+                      </label>
+                    </div>
+
+                    {photos.length > 0 && (
+                      <div className="mt-6 grid grid-cols-4 gap-4">
+                        {photos.map((photo, index) => (
+                          <div key={index} className="relative">
+                            <img
+                              src={URL.createObjectURL(photo)}
+                              alt=""
+                              className="w-full h-32 object-cover rounded-lg"
+                            />
+                            <button
+                              type="button"
+                              className="absolute top-2 right-2 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center cursor-pointer"
+                              onClick={() => {
+                                setPhotos(photos.filter((_, i) => i !== index));
+                              }}
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </FormItem>
+                </div>
+              )}
+
+              {/* Step 5: Food Menu */}
+              {currentStep === 5 && (
+                <div className="space-y-6">
+                  <h3 className="text-lg font-medium">Weekly Food Menu</h3>
+                  <p className="text-sm text-gray-500">Please provide details about your meal plan. This information will be displayed to potential residents.</p>
+                  
+                  <div className="space-y-6">
+                    {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => (
+                      <div key={day} className="border rounded-lg p-4">
+                        <h4 className="font-medium mb-3">{day}</h4>
+                        <div className="grid grid-cols-3 gap-4">
+                          <div>
+                            <FormLabel>Breakfast</FormLabel>
+                            <Textarea placeholder="Poha, Tea, Fruit, etc." />
+                          </div>
+                          <div>
+                            <FormLabel>Lunch</FormLabel>
+                            <Textarea placeholder="Roti, Rice, Dal, Sabzi, etc." />
+                          </div>
+                          <div>
+                            <FormLabel>Dinner</FormLabel>
+                            <Textarea placeholder="Roti, Rice, Dal, Sabzi, etc." />
+                          </div>
+                        </div>
+                      </div>
                     ))}
                   </div>
                 </div>
               )}
-              
-              {formData.rules.length > 0 && (
-                <div>
-                  <h3 className="font-medium text-gray-900 mb-2">House Rules</h3>
-                  <div className="bg-gray-50 p-4 rounded-md">
-                    <ul className="list-disc list-inside space-y-1">
-                      {formData.rules.map((rule, index) => (
-                        <li key={index} className="text-gray-700">{rule}</li>
-                      ))}
-                    </ul>
+
+              {/* Step 6: Contact Info */}
+              {currentStep === 6 && (
+                <div className="space-y-6">
+                  <FormField
+                    control={form.control}
+                    name="contactName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Contact Person Name</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="grid grid-cols-2 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="contactEmail"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email Address</FormLabel>
+                          <FormControl>
+                            <Input {...field} type="email" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="contactPhone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Phone Number</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
+
+                  <FormField
+                    control={form.control}
+                    name="termsAccepted"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 pt-4">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel>
+                            I agree to the terms and conditions and privacy policy
+                          </FormLabel>
+                          <FormMessage />
+                        </div>
+                      </FormItem>
+                    )}
+                  />
                 </div>
               )}
-              
-              <div>
-                <h3 className="font-medium text-gray-900 mb-2">Contact Information</h3>
-                <div className="bg-gray-50 p-4 rounded-md">
-                  <p><span className="font-medium">Name:</span> {formData.contactInfo.name}</p>
-                  <p><span className="font-medium">Email:</span> {formData.contactInfo.email}</p>
-                  <p><span className="font-medium">Phone:</span> {formData.contactInfo.phone}</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="border-t border-gray-200 pt-6">
-              <p className="text-sm text-gray-500 mb-4">
-                By submitting this listing, you confirm that all information provided is accurate and that you have the right to list this property.
-              </p>
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full py-3 bg-primary text-white rounded-md hover:bg-primary/90 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center"
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="animate-spin h-5 w-5 mr-2" />
-                    Submitting...
-                  </>
-                ) : (
-                  'Submit Listing'
+
+              <div className="mt-8 flex justify-between">
+                {currentStep > 1 && (
+                  <Button
+                    type="button"
+                    onClick={goToPreviousStep}
+                    variant="outline"
+                  >
+                    Previous
+                  </Button>
                 )}
-              </button>
-            </div>
-          </div>
-        )}
-        
-        {/* Navigation Buttons */}
-        {currentStep !== 5 && (
-          <div className="mt-8 flex justify-between">
-            {currentStep > 1 && (
-              <button
-                type="button"
-                onClick={prevStep}
-                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
-              >
-                Previous
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={nextStep}
-              className="ml-auto px-6 py-2 bg-primary text-white rounded-md hover:bg-primary/90"
-            >
-              Next
-            </button>
-          </div>
-        )}
-      </form>
+                
+                {currentStep < steps.length && (
+                  <Button
+                    type="button"
+                    onClick={goToNextStep}
+                    className="ml-auto"
+                  >
+                    Next
+                  </Button>
+                )}
+                
+                {currentStep === steps.length && (
+                  <Button type="submit" className="ml-auto">
+                    Submit Listing
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </form>
+      </Form>
     </div>
   );
 };

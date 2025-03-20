@@ -3,9 +3,10 @@ import React from 'react';
 import ListingForm from '../components/ListingForm';
 import Footer from '../components/Footer';
 import { toast } from 'sonner';
+import { PropertyFormData } from '@/lib/types';
 
 const AddListing = () => {
-  const handleSubmit = (data: any) => {
+  const handleSubmit = (data: PropertyFormData) => {
     console.log('Form submitted:', data);
     toast.success('Property listing submitted successfully!');
   };
@@ -16,7 +17,7 @@ const AddListing = () => {
         <div className="text-center mb-12">
           <h1 className="text-3xl font-bold text-gray-900">List Your Property</h1>
           <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-            Add your property to our platform and connect with thousands of students looking for accommodation
+            Add your PG, hostel, or rental accommodation to our platform and connect with thousands of people looking for a place to stay in Ahmedabad
           </p>
         </div>
         

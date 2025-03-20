@@ -14,12 +14,12 @@ const Listings = () => {
   const [properties, setProperties] = useState<Property[]>(PROPERTIES);
   const [filteredProperties, setFilteredProperties] = useState<Property[]>(PROPERTIES);
   const [searchTerm, setSearchTerm] = useState('');
-  const [searchLocation, setSearchLocation] = useState('Boston, MA');
+  const [searchLocation, setSearchLocation] = useState('Ahmedabad, Gujarat');
   const [showMap, setShowMap] = useState(false);
   const [isGridView, setIsGridView] = useState(true);
   const [sortOption, setSortOption] = useState('recommended');
   const [filters, setFilters] = useState({
-    priceRange: { min: 0, max: 10000 },
+    priceRange: { min: 0, max: 100000 },
     roomTypes: [] as string[],
     genderPolicies: [] as string[],
     propertyTypes: [] as string[],
@@ -52,7 +52,7 @@ const Listings = () => {
     }
     
     // Apply location filter
-    if (searchLocation && searchLocation !== 'Boston, MA') {
+    if (searchLocation && searchLocation !== 'Ahmedabad, Gujarat') {
       filtered = filtered.filter((property) => 
         property.location.city.toLowerCase() === searchLocation.split(',')[0].toLowerCase()
       );
@@ -120,7 +120,7 @@ const Listings = () => {
       {/* Search Header */}
       <div className="bg-primary/5 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-6">Find Your Perfect Student Stay</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-6">Find Your Perfect Accommodation</h1>
           
           <form onSubmit={handleSearch} className="flex flex-col md:flex-row md:items-center gap-4">
             <div className="relative flex-grow w-full md:w-auto">
@@ -133,8 +133,8 @@ const Listings = () => {
                   value={searchLocation}
                   onChange={(e) => setSearchLocation(e.target.value)}
                 >
-                  <option value="Boston, MA">Boston, MA</option>
-                  <option value="Cambridge, MA">Cambridge, MA</option>
+                  <option value="Ahmedabad, Gujarat">Ahmedabad, Gujarat</option>
+                  <option value="Gandhinagar, Gujarat">Gandhinagar, Gujarat</option>
                 </select>
               </div>
             </div>
@@ -231,7 +231,7 @@ const Listings = () => {
             {showMap && (
               <div className="h-[400px] mb-8 rounded-xl overflow-hidden">
                 <Map
-                  coordinates={[42.3601, -71.0589]} // Boston coordinates
+                  coordinates={[23.0225, 72.5714]} // Ahmedabad coordinates
                   markers={filteredProperties.map(p => ({
                     coordinates: p.location.coordinates,
                     title: p.name
