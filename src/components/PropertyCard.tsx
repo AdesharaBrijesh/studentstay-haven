@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Star, Heart, MapPin, User, Bath, ArrowRight } from 'lucide-react';
@@ -14,7 +13,6 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, featured = false 
   const [isFavorited, setIsFavorited] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
-  // Automatic image rotation for featured properties
   useEffect(() => {
     if (featured && property.photos.length > 1) {
       const interval = setInterval(() => {
@@ -24,7 +22,6 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, featured = false 
     }
   }, [featured, property.photos.length]);
 
-  // Animation on scroll
   useEffect(() => {
     if (cardRef.current) {
       const observer = new IntersectionObserver(
@@ -41,7 +38,6 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, featured = false 
     }
   }, []);
 
-  // Get amenity icons
   const getAmenityIcon = (amenity: string) => {
     switch (amenity) {
       case 'wifi':
@@ -75,7 +71,6 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, featured = false 
       }`}
     >
       <div className={`flex flex-col ${featured ? 'lg:flex-row' : ''}`}>
-        {/* Image Section */}
         <div className={`relative overflow-hidden ${featured ? 'lg:w-1/2' : ''}`}>
           <div className="aspect-w-16 aspect-h-9">
             <img
@@ -85,7 +80,6 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, featured = false 
             />
           </div>
           
-          {/* Image Navigation */}
           {property.photos.length > 1 && (
             <div className="absolute bottom-3 left-0 right-0 flex justify-center space-x-2">
               {property.photos.map((_, index) => (
@@ -101,7 +95,6 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, featured = false 
             </div>
           )}
           
-          {/* Favorite Button */}
           <button
             onClick={() => setIsFavorited(!isFavorited)}
             className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-sm transition-all hover:bg-white"
@@ -112,23 +105,21 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, featured = false 
             />
           </button>
           
-          {/* Property Type Tag */}
           <div className="absolute top-3 left-3">
             <div className="bg-black/70 backdrop-blur-sm text-white text-xs px-3 py-1 rounded-full">
-              {property.type === 'student-housing' 
-                ? 'Student Housing' 
-                : property.type === 'pg' 
-                  ? 'PG' 
+              {property.type === 'pg' 
+                ? 'PG' 
+                : property.type === 'hostel' 
+                  ? 'Hostel' 
                   : property.type === 'dormitory' 
                     ? 'Dormitory' 
-                    : property.type === 'shared-house'
-                      ? 'Shared House'
-                      : 'Hostel'}
+                    : property.type === 'shared-apartment'
+                      ? 'Shared Apartment'
+                      : 'Single Room'}
             </div>
           </div>
         </div>
 
-        {/* Content Section */}
         <div className={`p-5 flex flex-col ${featured ? 'lg:w-1/2 lg:p-6' : ''}`}>
           <div className="mb-auto">
             <div className="flex justify-between items-start">
@@ -136,7 +127,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, featured = false 
                 {property.name}
               </h3>
               <p className="text-lg font-bold text-primary">
-                ${property.price}
+                ₹{property.price}
                 <span className="text-xs text-muted-foreground font-normal">/mo</span>
               </p>
             </div>
@@ -146,7 +137,6 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, featured = false 
               <span>{property.location.address}, {property.location.city}</span>
             </div>
             
-            {/* Rating */}
             {property.rating && (
               <div className="flex items-center space-x-1 mb-3">
                 <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
@@ -155,14 +145,12 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, featured = false 
               </div>
             )}
             
-            {/* Description - only shown for featured cards */}
             {featured && (
               <p className="text-muted-foreground text-sm mt-2 mb-4 line-clamp-3">
                 {property.description}
               </p>
             )}
             
-            {/* Details */}
             <div className="grid grid-cols-2 gap-y-2 gap-x-4 text-sm mt-3">
               <div className="flex items-center space-x-1 text-muted-foreground">
                 <User className="h-4 w-4" />
@@ -175,7 +163,6 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, featured = false 
             </div>
           </div>
           
-          {/* Amenities and CTA */}
           <div className="mt-4 pt-4 border-t border-gray-100">
             <div className="flex flex-wrap gap-2 mb-4">
               {property.amenities.slice(0, 4).map((amenity) => (
