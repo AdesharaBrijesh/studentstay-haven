@@ -2,7 +2,7 @@
 import React from 'react';
 import ListingForm from '../components/ListingForm';
 import Footer from '../components/Footer';
-import { toast } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 
 const AddListing = () => {
   const handleSubmit = (data: any) => {

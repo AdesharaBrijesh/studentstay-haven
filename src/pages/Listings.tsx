@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Search, MapPin, ArrowUpDown, List, Grid, Map as MapIcon } from 'lucide-react';
+import { Search, MapPin, ArrowUpDown, List, Grid, Map as MapIcon, Home } from 'lucide-react';
 import PropertyCard from '../components/PropertyCard';
 import PropertyFilters from '../components/PropertyFilters';
 import Map from '../components/Map';

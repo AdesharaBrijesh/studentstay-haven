@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { 
@@ -17,7 +16,7 @@ import ContactForm from '../components/ContactForm';
 import Footer from '../components/Footer';
 import { PROPERTIES } from '../lib/data';
 import { Property } from '../lib/types';
-import { toast } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 
 const PropertyDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -425,3 +424,4 @@ const PropertyDetail = () => {
 };
 
 export default PropertyDetail;
+
