@@ -197,7 +197,7 @@ export const PROPERTIES: Property[] = [
   },
   {
     id: '6',
-    name: 'Scholar's Retreat',
+    name: 'Scholar\'s Retreat',
     description: 'Peaceful, academic-focused living environment designed for serious students. Our property offers individual study nooks, group study rooms, and quiet hours throughout the day. Enjoy a conducive atmosphere for academic excellence.',
     type: 'shared-house',
     price: 780,
