@@ -6,7 +6,7 @@ import { Search, MapPin, ArrowRight } from 'lucide-react';
 const Hero = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = React.useState('');
-  const [location, setLocation] = React.useState('Boston, MA');
+  const [location, setLocation] = React.useState('Ahmedabad, Gujarat');
   const heroRef = useRef<HTMLDivElement>(null);
   
   const handleSearch = (e: React.FormEvent) => {
@@ -44,11 +44,11 @@ const Hero = () => {
       >
         <div className="max-w-3xl">
           <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl md:text-6xl leading-tight">
-            Find your perfect <span className="text-primary">student accommodation</span> in Boston
+            Find your perfect <span className="text-primary">accommodation</span> in Ahmedabad
           </h1>
           <p className="mt-6 text-xl text-muted-foreground">
-            Discover affordable, comfortable places to stay while you focus on your education. 
-            Browse PGs, hostels, and student housing options that match your needs.
+            Discover affordable, comfortable places to stay for professionals, students, and everyone in between. 
+            Browse PGs, hostels, and shared accommodations that match your needs.
           </p>
 
           <div className="mt-8 sm:mt-12">
@@ -63,8 +63,11 @@ const Hero = () => {
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                   >
-                    <option value="Boston, MA">Boston, MA</option>
-                    <option value="Cambridge, MA">Cambridge, MA</option>
+                    <option value="Ahmedabad, Gujarat">Ahmedabad, Gujarat</option>
+                    <option value="Gandhinagar, Gujarat">Gandhinagar, Gujarat</option>
+                    <option value="Vastrapur, Ahmedabad">Vastrapur, Ahmedabad</option>
+                    <option value="Navrangpura, Ahmedabad">Navrangpura, Ahmedabad</option>
+                    <option value="Satellite, Ahmedabad">Satellite, Ahmedabad</option>
                   </select>
                 </div>
               </div>
@@ -102,7 +105,7 @@ const Hero = () => {
               Verified Listings
             </div>
             <div className="bg-white rounded-full px-4 py-1.5 text-sm font-medium text-foreground shadow-sm border border-gray-100">
-              Student-Friendly
+              Daily Meals Included
             </div>
           </div>
         </div>

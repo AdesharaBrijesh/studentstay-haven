@@ -77,9 +77,9 @@ const Index = () => {
       description: 'Find places with the exact amenities you need for comfortable living.'
     },
     {
-      icon: <Book className="h-6 w-6 text-primary" />,
-      title: 'Student-Friendly',
-      description: 'Properties close to educational institutions and designed for students.'
+      icon: <Home className="h-6 w-6 text-primary" />,
+      title: 'Delicious Meals',
+      description: 'Weekly menu with variety of nutritious and authentic Gujarati dishes.'
     },
     {
       icon: <Lock className="h-6 w-6 text-primary" />,
@@ -92,7 +92,7 @@ const Index = () => {
     {
       number: '01',
       title: 'Search Properties',
-      description: 'Browse our extensive collection of student accommodations in Boston.'
+      description: 'Browse our extensive collection of PGs and accommodations in Ahmedabad.'
     },
     {
       number: '02',
@@ -107,7 +107,7 @@ const Index = () => {
     {
       number: '04',
       title: 'Move In',
-      description: 'Complete the booking process and move into your new student home.'
+      description: 'Complete the booking process and move into your new home.'
     }
   ];
 
@@ -128,10 +128,10 @@ const Index = () => {
             }`}
           >
             <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl mb-4">
-              The Smarter Way to Find Student Housing
+              The Smarter Way to Find Quality Accommodation
             </h2>
             <p className="max-w-2xl mx-auto text-lg text-muted-foreground">
-              We make finding the perfect student accommodation easy, safe, and stress-free.
+              We make finding the perfect accommodation in Ahmedabad easy, safe, and stress-free.
             </p>
           </div>
           
@@ -172,7 +172,7 @@ const Index = () => {
               How It Works
             </h2>
             <p className="max-w-2xl mx-auto text-lg text-muted-foreground">
-              Find your perfect student accommodation in four simple steps
+              Find your perfect accommodation in four simple steps
             </p>
           </div>
           
@@ -222,7 +222,7 @@ const Index = () => {
                 Featured Properties
               </h2>
               <p className="max-w-2xl text-lg text-muted-foreground">
-                Discover our handpicked selection of premium student accommodations
+                Discover our handpicked selection of premium accommodations in Ahmedabad
               </p>
             </div>
             <div className="mt-4 md:mt-0">
@@ -259,34 +259,34 @@ const Index = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl mb-4">
-              What Students Say
+              What Our Residents Say
             </h2>
             <p className="max-w-2xl mx-auto text-lg text-muted-foreground">
-              Hear from students who found their perfect accommodation through our platform
+              Hear from people who found their perfect accommodation through our platform
             </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               {
-                name: 'Emily Johnson',
-                program: 'Business Administration',
-                university: 'Boston University',
-                text: 'Finding accommodation as an international student was incredibly stressful until I discovered StudentStay. The platform made it so easy to find a place that suited my needs and budget.',
+                name: 'Rahul Sharma',
+                profession: 'Software Developer',
+                company: 'TCS Ahmedabad',
+                text: 'As someone who relocated to Ahmedabad for work, finding quality accommodation with good food was my priority. This platform made it easy to find a PG with delicious Gujarati meals included.',
                 rating: 5
               },
               {
-                name: 'Michael Chen',
-                program: 'Computer Science',
-                university: 'MIT',
-                text: 'The filtering options made it super easy to find exactly what I was looking for. I found a great shared apartment close to campus with all the amenities I needed.',
+                name: 'Priya Patel',
+                profession: 'Research Associate',
+                company: 'ISRO',
+                text: 'The filtering options made it super easy to find exactly what I was looking for. I found a great shared apartment close to my workplace with all the amenities I needed.',
                 rating: 4
               },
               {
-                name: 'Sophia Rodriguez',
-                program: 'Medicine',
-                university: 'Harvard University',
-                text: 'As a medical student with a tight schedule, I needed a quiet place close to the hospital. StudentStay helped me find the perfect studio apartment within my budget.',
+                name: 'Deepak Mehta',
+                profession: 'Medical Professional',
+                company: 'Civil Hospital',
+                text: 'With my hectic schedule at the hospital, I needed a quiet place with good food. Found the perfect PG with home-cooked meals which was exactly what I needed after long shifts.',
                 rating: 5
               }
             ].map((testimonial, index) => (
@@ -314,7 +314,7 @@ const Index = () => {
                   <div className="ml-3">
                     <p className="font-medium text-gray-900">{testimonial.name}</p>
                     <p className="text-sm text-muted-foreground">
-                      {testimonial.program}, {testimonial.university}
+                      {testimonial.profession}, {testimonial.company}
                     </p>
                   </div>
                 </div>
@@ -330,10 +330,10 @@ const Index = () => {
           <div className="bg-white rounded-xl p-8 md:p-12 shadow-sm border border-gray-100 text-center">
             <div className="max-w-3xl mx-auto">
               <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
-                Ready to Find Your Perfect Student Accommodation?
+                Ready to Find Your Perfect Accommodation in Ahmedabad?
               </h2>
               <p className="text-lg text-muted-foreground mb-8">
-                Browse through our extensive collection of PGs, hostels, and student housing options to find your ideal home away from home.
+                Browse through our extensive collection of PGs, hostels, and shared housing options with daily meals and essential amenities.
               </p>
               <div className="flex flex-col sm:flex-row justify-center gap-4">
                 <button 
