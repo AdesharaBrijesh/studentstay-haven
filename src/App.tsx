@@ -1,34 +1,52 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import Listings from "./pages/Listings";
-import PropertyDetail from "./pages/PropertyDetail";
-import AddListing from "./pages/AddListing";
-import NotFound from "./pages/NotFound";
+import { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Navbar from './components/Navbar';
+import Index from './pages/Index';
+import Listings from './pages/Listings';
+import PropertyDetail from './pages/PropertyDetail';
+import AddListing from './pages/AddListing';
+import NotFound from './pages/NotFound';
+import Compare from './pages/Compare';
+import CompareDrawer from './components/CompareDrawer';
+import { CompareProvider } from './lib/CompareContext';
+import { GitCompare } from 'lucide-react';
+import { Toaster } from 'sonner';
 
-const queryClient = new QueryClient();
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
+function App() {
+  const [showCompareDrawer, setShowCompareDrawer] = useState(false);
+  
+  return (
+    <CompareProvider>
+      <Router>
+        <Navbar />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/listings" element={<Listings />} />
           <Route path="/property/:id" element={<PropertyDetail />} />
           <Route path="/add-listing" element={<AddListing />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="/compare" element={<Compare />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+        
+        {/* Compare Toggle Button */}
+        <button
+          onClick={() => setShowCompareDrawer(!showCompareDrawer)}
+          className="fixed bottom-5 right-5 z-50 bg-primary text-white p-3 rounded-full shadow-lg hover:bg-primary/90 transition-colors"
+          aria-label="Toggle compare drawer"
+        >
+          <GitCompare className="h-5 w-5" />
+        </button>
+        
+        <CompareDrawer 
+          isOpen={showCompareDrawer} 
+          onClose={() => setShowCompareDrawer(false)} 
+        />
+        
+        <Toaster position="top-right" />
+      </Router>
+    </CompareProvider>
+  );
+}
 
 export default App;

@@ -7,3 +7,4 @@ export { Input } from './input';
 export { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select';
 export { Textarea } from './textarea';
 export { Checkbox } from './checkbox';
+export { Tabs, TabsList, TabsTrigger, TabsContent } from './tabs';

@@ -1,13 +1,14 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Search, MapPin, ArrowUpDown, List, Grid, Map as MapIcon, Home } from 'lucide-react';
+import { Search, MapPin, ArrowUpDown, List, Grid, Map as MapIcon, Home, GitCompare } from 'lucide-react';
 import PropertyCard from '../components/PropertyCard';
 import PropertyFilters from '../components/PropertyFilters';
 import Map from '../components/Map';
 import Footer from '../components/Footer';
 import { PROPERTIES } from '../lib/data';
 import { Property } from '../lib/types';
+import { useCompare } from '../lib/CompareContext';
 
 const Listings = () => {
   const location = useLocation();
@@ -26,6 +27,7 @@ const Listings = () => {
     amenities: [] as string[]
   });
   
+  const { compareList } = useCompare();
   const resultsRef = useRef<HTMLDivElement>(null);
 
   // Extract search params from navigation state
@@ -171,7 +173,7 @@ const Listings = () => {
             {filteredProperties.length} Properties {searchLocation && `in ${searchLocation}`}
           </h2>
           
-          <div className="flex items-center space-x-4 mt-4 md:mt-0">
+          <div className="flex items-center flex-wrap gap-4 mt-4 md:mt-0">
             <div className="flex items-center space-x-2">
               <select
                 value={sortOption}
@@ -214,6 +216,12 @@ const Listings = () => {
               <MapIcon className="h-4 w-4" />
               <span>{showMap ? 'Hide Map' : 'Show Map'}</span>
             </button>
+            
+            {compareList.length > 0 && (
+              <div className="hidden md:block text-sm">
+                <span className="font-medium">{compareList.length}</span> properties in comparison
+              </div>
+            )}
           </div>
         </div>
         
@@ -237,6 +245,17 @@ const Listings = () => {
                     title: p.name
                   }))}
                 />
+              </div>
+            )}
+            
+            {compareList.length > 0 && (
+              <div className="mb-4 md:hidden flex items-center justify-between bg-primary/5 p-3 rounded-lg">
+                <div className="flex items-center">
+                  <GitCompare className="h-4 w-4 mr-2 text-primary" />
+                  <span className="text-sm">
+                    <span className="font-medium">{compareList.length}</span> properties in comparison
+                  </span>
+                </div>
               </div>
             )}
             

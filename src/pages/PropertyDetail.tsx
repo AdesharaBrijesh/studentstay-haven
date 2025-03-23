@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { 
@@ -9,16 +8,20 @@ import {
   ChevronLeft, 
   Phone, 
   Mail,
-  Utensils
+  Utensils,
+  GitCompare
 } from 'lucide-react';
 import ImageGallery from '../components/ImageGallery';
 import AmenitiesList from '../components/AmenitiesList';
 import Map from '../components/Map';
 import ContactForm from '../components/ContactForm';
 import Footer from '../components/Footer';
+import DaySelector from '../components/DaySelector';
+import CompareButton from '../components/CompareButton';
 import { PROPERTIES } from '../lib/data';
 import { Property } from '../lib/types';
 import { toast } from 'sonner';
+import { useCompare } from '../lib/CompareContext';
 
 const PropertyDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -28,6 +31,7 @@ const PropertyDetail = () => {
   const [showAllAmenities, setShowAllAmenities] = useState(false);
   const [showContactModal, setShowContactModal] = useState(false);
   const [showPhoneNumber, setShowPhoneNumber] = useState(false);
+  const { addToCompare, removeFromCompare, isInCompare } = useCompare();
   
   useEffect(() => {
     // Scroll to top on page load
@@ -53,6 +57,16 @@ const PropertyDetail = () => {
 
   const handleScheduleViewing = () => {
     setShowContactModal(true);
+  };
+
+  const handleToggleCompare = () => {
+    if (!property) return;
+    
+    if (isInCompare(property.id)) {
+      removeFromCompare(property.id);
+    } else {
+      addToCompare(property);
+    }
   };
 
   const getPropertyTypeLabel = (type: string) => {
@@ -166,6 +180,17 @@ const PropertyDetail = () => {
           <div className="mt-4 md:mt-0 flex flex-col items-end">
             <div className="text-3xl font-bold text-gray-900">₹{property.price}</div>
             <div className="text-muted-foreground">per month</div>
+            <button
+              onClick={handleToggleCompare}
+              className={`mt-2 flex items-center gap-1 px-3 py-1 rounded-full text-sm ${
+                isInCompare(property.id)
+                  ? 'bg-primary/10 text-primary'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              } transition-colors`}
+            >
+              <GitCompare className="h-3 w-3" />
+              <span>{isInCompare(property.id) ? 'Remove from Compare' : 'Add to Compare'}</span>
+            </button>
           </div>
         </div>
         
@@ -331,48 +356,7 @@ const PropertyDetail = () => {
                   Our meal plan includes breakfast, lunch, and dinner all 7 days of the week. All meals are prepared fresh using quality ingredients.
                 </p>
                 
-                <div className="space-y-6">
-                  {Object.entries(property.foodMenu).map(([day, meals]) => (
-                    <div key={day} className="border border-gray-100 rounded-lg p-4">
-                      <h3 className="font-semibold mb-3 text-primary capitalize">{day}</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                          <h4 className="font-medium mb-2">Breakfast</h4>
-                          <ul className="text-sm space-y-1 text-muted-foreground">
-                            {meals.breakfast.map((item, index) => (
-                              <li key={index} className="flex items-start">
-                                <span className="mr-2">•</span>
-                                <span>{item}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                        <div>
-                          <h4 className="font-medium mb-2">Lunch</h4>
-                          <ul className="text-sm space-y-1 text-muted-foreground">
-                            {meals.lunch.map((item, index) => (
-                              <li key={index} className="flex items-start">
-                                <span className="mr-2">•</span>
-                                <span>{item}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                        <div>
-                          <h4 className="font-medium mb-2">Dinner</h4>
-                          <ul className="text-sm space-y-1 text-muted-foreground">
-                            {meals.dinner.map((item, index) => (
-                              <li key={index} className="flex items-start">
-                                <span className="mr-2">•</span>
-                                <span>{item}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <DaySelector foodMenu={property.foodMenu} />
 
                 <div className="mt-6 bg-yellow-50 border border-yellow-100 rounded-lg p-4">
                   <h3 className="font-medium text-yellow-800 mb-2">Special Dietary Requirements</h3>
@@ -480,6 +464,18 @@ const PropertyDetail = () => {
                   className="w-full py-3 px-4 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   Save to Favorites
+                </button>
+                
+                <button 
+                  onClick={handleToggleCompare}
+                  className={`w-full py-3 px-4 flex items-center justify-center ${
+                    isInCompare(property.id)
+                      ? 'bg-primary/10 text-primary border border-primary/30'
+                      : 'border border-gray-200 text-gray-700 hover:bg-gray-50'
+                  } rounded-lg transition-colors`}
+                >
+                  <GitCompare className="h-4 w-4 mr-2" />
+                  {isInCompare(property.id) ? 'Remove from Compare' : 'Add to Compare'}
                 </button>
               </div>
               
