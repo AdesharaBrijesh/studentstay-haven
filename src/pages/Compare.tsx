@@ -78,15 +78,6 @@ const Compare = () => {
       : <X className="h-5 w-5 text-red-400" />;
   };
 
-  // Calculate dynamic width for property columns based on number of properties
-  const getPropertyColumnWidth = () => {
-    const count = properties.length;
-    // Reserve 25% for the feature column, divide the rest equally
-    const remainingWidth = 75;
-    const colWidth = remainingWidth / count;
-    return `w-[${colWidth}%]`;
-  };
-
   return (
     <div className="min-h-screen pt-16">
       {/* Navigation */}
@@ -117,10 +108,10 @@ const Compare = () => {
           <table className="w-full border-collapse">
             {/* Sticky headers */}
             <thead className="sticky top-[120px] z-10">
-              <tr className="grid grid-cols-4">
-                <th className="text-left p-4 bg-white border-b-2 border-gray-100">Property</th>
-                {properties.map((property, index) => (
-                  <th key={property.id} className={`col-span-${properties.length === 1 ? 3 : properties.length === 2 ? 1.5 : 1} p-4 border-b-2 border-gray-100 bg-white`}>
+              <tr>
+                <th className="text-left p-4 bg-white border-b-2 border-gray-100 w-1/4 min-w-[200px]">Property</th>
+                {properties.map((property) => (
+                  <th key={property.id} className="p-4 border-b-2 border-gray-100 bg-white min-w-[250px]">
                     <div className="flex flex-col items-center">
                       <div className="relative w-full mb-3">
                         <img
@@ -150,14 +141,14 @@ const Compare = () => {
                 ))}
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-gray-100">
               {/* Basic Details */}
-              <tr className="grid grid-cols-4">
-                <td colSpan={4} className="col-span-4 bg-gray-100 p-2">
+              <tr>
+                <td colSpan={properties.length + 1} className="bg-gray-100 p-2">
                   <h3 className="font-medium">Basic Details</h3>
                 </td>
               </tr>
-              <tr className="grid grid-cols-4">
+              <tr>
                 <td className="p-4 border-b border-gray-100 font-medium bg-gray-50">Property Type</td>
                 {properties.map((property) => (
                   <td 
@@ -168,7 +159,7 @@ const Compare = () => {
                   </td>
                 ))}
               </tr>
-              <tr className="grid grid-cols-4">
+              <tr>
                 <td className="p-4 border-b border-gray-100 font-medium bg-gray-50">Location</td>
                 {properties.map((property) => (
                   <td 
@@ -184,12 +175,12 @@ const Compare = () => {
               </tr>
               
               {/* Room Details */}
-              <tr className="grid grid-cols-4">
-                <td colSpan={4} className="col-span-4 bg-gray-100 p-2">
+              <tr>
+                <td colSpan={properties.length + 1} className="bg-gray-100 p-2">
                   <h3 className="font-medium">Room Details</h3>
                 </td>
               </tr>
-              <tr className="grid grid-cols-4">
+              <tr>
                 <td className="p-4 border-b border-gray-100 font-medium bg-gray-50">Room Type</td>
                 {properties.map((property) => (
                   <td 
@@ -204,7 +195,7 @@ const Compare = () => {
                   </td>
                 ))}
               </tr>
-              <tr className="grid grid-cols-4">
+              <tr>
                 <td className="p-4 border-b border-gray-100 font-medium bg-gray-50">Gender Policy</td>
                 {properties.map((property) => (
                   <td 
@@ -227,7 +218,7 @@ const Compare = () => {
                   </td>
                 ))}
               </tr>
-              <tr className="grid grid-cols-4">
+              <tr>
                 <td className="p-4 border-b border-gray-100 font-medium bg-gray-50">Rooms</td>
                 {properties.map((property) => (
                   <td 
@@ -247,7 +238,7 @@ const Compare = () => {
                   </td>
                 ))}
               </tr>
-              <tr className="grid grid-cols-4">
+              <tr>
                 <td className="p-4 border-b border-gray-100 font-medium bg-gray-50">Room Size</td>
                 {properties.map((property) => (
                   <td 
@@ -260,12 +251,12 @@ const Compare = () => {
               </tr>
               
               {/* Amenities */}
-              <tr className="grid grid-cols-4">
-                <td colSpan={4} className="col-span-4 bg-gray-100 p-2">
+              <tr>
+                <td colSpan={properties.length + 1} className="bg-gray-100 p-2">
                   <h3 className="font-medium">Amenities</h3>
                 </td>
               </tr>
-              <tr className="grid grid-cols-4">
+              <tr>
                 <td className="p-4 border-b border-gray-100 font-medium bg-gray-50">Food Included</td>
                 {properties.map((property) => (
                   <td 
@@ -279,7 +270,7 @@ const Compare = () => {
               
               {/* Get all unique amenities across all properties */}
               {Array.from(new Set(properties.flatMap(p => p.amenities))).map((amenity, index) => (
-                <tr key={index} className="grid grid-cols-4">
+                <tr key={index}>
                   <td className="p-4 border-b border-gray-100 font-medium bg-gray-50">{amenity}</td>
                   {properties.map((property) => (
                     <td 
