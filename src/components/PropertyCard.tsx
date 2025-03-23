@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Star, MapPin } from 'lucide-react';
 import CompareButton from './CompareButton';
 import { Property } from '../lib/types';
+import { getPropertyTypeLabel } from '../utils/propertyUtils';
 
 interface PropertyCardProps {
   property: Property;
@@ -10,29 +11,11 @@ interface PropertyCardProps {
 }
 
 const PropertyCard: React.FC<PropertyCardProps> = ({ property, featured = false }) => {
-  const getPropertyTypeLabel = (type: string) => {
-    switch(type) {
-      case 'pg':
-        return 'PG';
-      case 'hostel':
-        return 'Hostel';
-      case 'shared-apartment':
-        return 'Shared Apartment';
-      case 'single-room':
-        return 'Single Room';
-      case 'dormitory':
-        return 'Dormitory';
-      default:
-        return type;
-    }
-  };
-
   return (
     <Link to={`/property/${property.id}`} className={`block group ${featured ? '' : 'h-full'}`}>
       <div className={`border border-gray-200 rounded-xl overflow-hidden transition-all bg-white hover:shadow-md ${
         featured ? 'flex flex-col md:flex-row' : 'h-full flex flex-col'
       }`}>
-        {/* Property Image */}
         <div className={`relative ${featured ? 'w-full md:w-1/3 md:flex-shrink-0' : 'aspect-[4/3]'}`}>
           <img 
             src={property.photos[0]} 
@@ -49,7 +32,6 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, featured = false 
           </div>
         </div>
         
-        {/* Property Details */}
         <div className={`p-4 flex flex-col ${featured ? 'md:w-2/3' : 'flex-grow'}`}>
           <div className="flex justify-between items-start mb-2">
             <h3 className="font-semibold text-lg text-gray-900 group-hover:text-primary transition-colors">

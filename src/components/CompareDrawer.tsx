@@ -1,10 +1,10 @@
-
 import React from 'react';
 import { X, ChevronRight, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useCompare } from '../lib/CompareContext';
 import { useIsMobile } from '../hooks/use-mobile';
 import { Property } from '../lib/types';
+import { getPropertyTypeLabel } from '../utils/propertyUtils';
 
 interface CompareDrawerProps {
   isOpen: boolean;
@@ -17,23 +17,6 @@ const CompareDrawer: React.FC<CompareDrawerProps> = ({ isOpen, onClose }) => {
   
   if (!isOpen) return null;
   
-  const getPropertyTypeLabel = (type: string) => {
-    switch(type) {
-      case 'pg':
-        return 'PG';
-      case 'hostel':
-        return 'Hostel';
-      case 'shared-apartment':
-        return 'Shared Apartment';
-      case 'single-room':
-        return 'Single Room';
-      case 'dormitory':
-        return 'Dormitory';
-      default:
-        return type;
-    }
-  };
-
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t border-gray-200 z-50 transition-transform">
       <div className="flex justify-between items-center px-4 py-3 border-b border-gray-100">
