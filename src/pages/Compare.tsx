@@ -80,9 +80,11 @@ const Compare = () => {
 
   // Calculate dynamic width for property columns based on number of properties
   const getPropertyColumnWidth = () => {
-    if (properties.length === 1) return "w-full";
-    if (properties.length === 2) return "w-1/2";
-    return ""; // Default width for 3 properties
+    const count = properties.length;
+    // Reserve 25% for the feature column, divide the rest equally
+    const remainingWidth = 75;
+    const colWidth = remainingWidth / count;
+    return `w-[${colWidth}%]`;
   };
 
   return (
@@ -115,10 +117,10 @@ const Compare = () => {
           <table className="w-full border-collapse">
             {/* Sticky headers */}
             <thead className="sticky top-[120px] z-10">
-              <tr>
-                <th className="text-left p-4 bg-white border-b-2 border-gray-100 w-1/4 min-w-[200px]">Property</th>
-                {properties.map((property) => (
-                  <th key={property.id} className={`p-4 border-b-2 border-gray-100 bg-white min-w-[250px] ${getPropertyColumnWidth()}`}>
+              <tr className="grid grid-cols-4">
+                <th className="text-left p-4 bg-white border-b-2 border-gray-100">Property</th>
+                {properties.map((property, index) => (
+                  <th key={property.id} className={`col-span-${properties.length === 1 ? 3 : properties.length === 2 ? 1.5 : 1} p-4 border-b-2 border-gray-100 bg-white`}>
                     <div className="flex flex-col items-center">
                       <div className="relative w-full mb-3">
                         <img
@@ -148,30 +150,30 @@ const Compare = () => {
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody>
               {/* Basic Details */}
-              <tr>
-                <td colSpan={properties.length + 1} className="bg-gray-100 p-2">
+              <tr className="grid grid-cols-4">
+                <td colSpan={4} className="col-span-4 bg-gray-100 p-2">
                   <h3 className="font-medium">Basic Details</h3>
                 </td>
               </tr>
-              <tr>
+              <tr className="grid grid-cols-4">
                 <td className="p-4 border-b border-gray-100 font-medium bg-gray-50">Property Type</td>
                 {properties.map((property) => (
                   <td 
                     key={property.id} 
-                    className={`p-4 border-b border-gray-100 text-center ${getCellBackground('type', (p) => p.type)} ${getPropertyColumnWidth()}`}
+                    className={`p-4 border-b border-gray-100 text-center ${getCellBackground('type', (p) => p.type)}`}
                   >
                     {getPropertyTypeLabel(property.type)}
                   </td>
                 ))}
               </tr>
-              <tr>
+              <tr className="grid grid-cols-4">
                 <td className="p-4 border-b border-gray-100 font-medium bg-gray-50">Location</td>
                 {properties.map((property) => (
                   <td 
                     key={property.id} 
-                    className={`p-4 border-b border-gray-100 ${getCellBackground('location', (p) => p.location.address)} ${getPropertyColumnWidth()}`}
+                    className={`p-4 border-b border-gray-100 ${getCellBackground('location', (p) => p.location.address)}`}
                   >
                     <div className="flex items-center justify-center">
                       <MapPin className="h-4 w-4 text-muted-foreground mr-1 flex-shrink-0" />
@@ -182,17 +184,17 @@ const Compare = () => {
               </tr>
               
               {/* Room Details */}
-              <tr>
-                <td colSpan={properties.length + 1} className="bg-gray-100 p-2">
+              <tr className="grid grid-cols-4">
+                <td colSpan={4} className="col-span-4 bg-gray-100 p-2">
                   <h3 className="font-medium">Room Details</h3>
                 </td>
               </tr>
-              <tr>
+              <tr className="grid grid-cols-4">
                 <td className="p-4 border-b border-gray-100 font-medium bg-gray-50">Room Type</td>
                 {properties.map((property) => (
                   <td 
                     key={property.id} 
-                    className={`p-4 border-b border-gray-100 text-center ${getCellBackground('roomType', (p) => p.roomDetails.roomType)} ${getPropertyColumnWidth()}`}
+                    className={`p-4 border-b border-gray-100 text-center ${getCellBackground('roomType', (p) => p.roomDetails.roomType)}`}
                   >
                     {property.roomDetails.roomType === 'private' 
                       ? 'Private Room' 
@@ -202,12 +204,12 @@ const Compare = () => {
                   </td>
                 ))}
               </tr>
-              <tr>
+              <tr className="grid grid-cols-4">
                 <td className="p-4 border-b border-gray-100 font-medium bg-gray-50">Gender Policy</td>
                 {properties.map((property) => (
                   <td 
                     key={property.id} 
-                    className={`p-4 border-b border-gray-100 text-center ${getCellBackground('genderPolicy', (p) => p.roomDetails.genderPolicy)} ${getPropertyColumnWidth()}`}
+                    className={`p-4 border-b border-gray-100 text-center ${getCellBackground('genderPolicy', (p) => p.roomDetails.genderPolicy)}`}
                   >
                     <span className={`px-2 py-1 rounded-full text-xs ${
                       property.roomDetails.genderPolicy === 'male' 
@@ -225,12 +227,12 @@ const Compare = () => {
                   </td>
                 ))}
               </tr>
-              <tr>
+              <tr className="grid grid-cols-4">
                 <td className="p-4 border-b border-gray-100 font-medium bg-gray-50">Rooms</td>
                 {properties.map((property) => (
                   <td 
                     key={property.id} 
-                    className={`p-4 border-b border-gray-100 text-center ${getCellBackground('rooms', (p) => `${p.roomDetails.bedrooms}-${p.roomDetails.bathrooms}`)} ${getPropertyColumnWidth()}`}
+                    className={`p-4 border-b border-gray-100 text-center ${getCellBackground('rooms', (p) => `${p.roomDetails.bedrooms}-${p.roomDetails.bathrooms}`)}`}
                   >
                     <div className="flex justify-center gap-4">
                       <div className="flex items-center">
@@ -245,12 +247,12 @@ const Compare = () => {
                   </td>
                 ))}
               </tr>
-              <tr>
+              <tr className="grid grid-cols-4">
                 <td className="p-4 border-b border-gray-100 font-medium bg-gray-50">Room Size</td>
                 {properties.map((property) => (
                   <td 
                     key={property.id} 
-                    className={`p-4 border-b border-gray-100 text-center ${getCellBackground('roomSize', (p) => p.roomDetails.roomSize)} ${getPropertyColumnWidth()}`}
+                    className={`p-4 border-b border-gray-100 text-center ${getCellBackground('roomSize', (p) => p.roomDetails.roomSize)}`}
                   >
                     <span className="font-medium">{property.roomDetails.roomSize}</span> <span className="text-muted-foreground">sq ft</span>
                   </td>
@@ -258,17 +260,17 @@ const Compare = () => {
               </tr>
               
               {/* Amenities */}
-              <tr>
-                <td colSpan={properties.length + 1} className="bg-gray-100 p-2">
+              <tr className="grid grid-cols-4">
+                <td colSpan={4} className="col-span-4 bg-gray-100 p-2">
                   <h3 className="font-medium">Amenities</h3>
                 </td>
               </tr>
-              <tr>
+              <tr className="grid grid-cols-4">
                 <td className="p-4 border-b border-gray-100 font-medium bg-gray-50">Food Included</td>
                 {properties.map((property) => (
                   <td 
                     key={property.id} 
-                    className={`p-4 border-b border-gray-100 text-center ${getCellBackground('food', (p) => p.foodMenu ? 'yes' : 'no')} ${getPropertyColumnWidth()}`}
+                    className={`p-4 border-b border-gray-100 text-center ${getCellBackground('food', (p) => p.foodMenu ? 'yes' : 'no')}`}
                   >
                     {renderAmenityStatus(property.foodMenu)}
                   </td>
@@ -277,12 +279,12 @@ const Compare = () => {
               
               {/* Get all unique amenities across all properties */}
               {Array.from(new Set(properties.flatMap(p => p.amenities))).map((amenity, index) => (
-                <tr key={index}>
+                <tr key={index} className="grid grid-cols-4">
                   <td className="p-4 border-b border-gray-100 font-medium bg-gray-50">{amenity}</td>
                   {properties.map((property) => (
                     <td 
                       key={property.id} 
-                      className={`p-4 border-b border-gray-100 text-center ${getCellBackground(amenity, (p) => p.amenities.includes(amenity))} ${getPropertyColumnWidth()}`}
+                      className={`p-4 border-b border-gray-100 text-center ${getCellBackground(amenity, (p) => p.amenities.includes(amenity))}`}
                     >
                       {renderAmenityStatus(property.amenities.includes(amenity))}
                     </td>
