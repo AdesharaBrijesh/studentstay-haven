@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Button, 
@@ -22,8 +21,9 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { PROPERTY_TYPES, ROOM_TYPES, GENDER_POLICIES, AMENITIES } from '../lib/data';
+import { PROPERTY_TYPES, ROOM_TYPES, GENDER_POLICIES } from '../lib/data';
 import { PropertyFormData } from '@/lib/types';
+import { useAmenities } from '@/hooks/useAmenities';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Property name is required" }),
@@ -57,6 +57,7 @@ const ListingForm: React.FC<ListingFormProps> = ({ onSubmit }) => {
   const [photos, setPhotos] = useState<File[]>([]);
   const [rules, setRules] = useState<string[]>([]);
   const [newRule, setNewRule] = useState('');
+  const { data: amenities = [], isLoading: amenitiesLoading } = useAmenities();
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -196,6 +197,7 @@ const ListingForm: React.FC<ListingFormProps> = ({ onSubmit }) => {
               {/* Step 1: Basic Info */}
               {currentStep === 1 && (
                 <div className="space-y-6">
+                  {/* Step 1 form fields */}
                   <FormField
                     control={form.control}
                     name="name"
@@ -335,6 +337,7 @@ const ListingForm: React.FC<ListingFormProps> = ({ onSubmit }) => {
               {/* Step 2: Room Details */}
               {currentStep === 2 && (
                 <div className="space-y-6">
+                  {/* Step 2 form fields */}
                   <div className="grid grid-cols-2 gap-6">
                     <FormField
                       control={form.control}
@@ -462,29 +465,33 @@ const ListingForm: React.FC<ListingFormProps> = ({ onSubmit }) => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Amenities</FormLabel>
-                        <div className="grid grid-cols-3 gap-4 mt-2">
-                          {AMENITIES.map(amenity => (
-                            <div key={amenity.id} className="flex items-center space-x-2">
-                              <Checkbox
-                                checked={field.value.includes(amenity.id)}
-                                onCheckedChange={checked => {
-                                  if (checked) {
-                                    field.onChange([...field.value, amenity.id]);
-                                  } else {
-                                    field.onChange(field.value.filter(value => value !== amenity.id));
-                                  }
-                                }}
-                                id={`amenity-${amenity.id}`}
-                              />
-                              <label 
-                                htmlFor={`amenity-${amenity.id}`}
-                                className="text-sm font-medium leading-none cursor-pointer"
-                              >
-                                {amenity.name}
-                              </label>
-                            </div>
-                          ))}
-                        </div>
+                        {amenitiesLoading ? (
+                          <div>Loading amenities...</div>
+                        ) : (
+                          <div className="grid grid-cols-3 gap-4 mt-2">
+                            {amenities.map(amenity => (
+                              <div key={amenity.id} className="flex items-center space-x-2">
+                                <Checkbox
+                                  checked={field.value.includes(amenity.name)}
+                                  onCheckedChange={checked => {
+                                    if (checked) {
+                                      field.onChange([...field.value, amenity.name]);
+                                    } else {
+                                      field.onChange(field.value.filter(value => value !== amenity.name));
+                                    }
+                                  }}
+                                  id={`amenity-${amenity.id}`}
+                                />
+                                <label 
+                                  htmlFor={`amenity-${amenity.id}`}
+                                  className="text-sm font-medium leading-none cursor-pointer"
+                                >
+                                  {amenity.name}
+                                </label>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                         <FormMessage />
                       </FormItem>
                     )}
