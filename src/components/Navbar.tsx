@@ -1,12 +1,15 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, User, Search, Menu, X } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { Home, User, Search, Menu, X, LogIn } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const { user, loading } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -40,6 +43,11 @@ const Navbar = () => {
     if (path !== '/' && location.pathname.startsWith(path)) return true;
     return false;
   };
+
+  // Don't render navbar on auth page
+  if (location.pathname === '/auth') {
+    return null;
+  }
 
   return (
     <header 
@@ -85,12 +93,25 @@ const Navbar = () => {
             >
               <Search className="h-5 w-5" />
             </Link>
-            <Link 
-              to="/profile" 
-              className="p-2.5 rounded-full text-foreground/70 hover:text-primary hover:bg-secondary transition-colors duration-200"
-            >
-              <User className="h-5 w-5" />
-            </Link>
+            
+            {loading ? (
+              <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse" />
+            ) : user ? (
+              <Link 
+                to="/profile" 
+                className="flex items-center p-2.5 rounded-full text-foreground/70 hover:text-primary hover:bg-secondary transition-colors duration-200"
+              >
+                <User className="h-5 w-5" />
+              </Link>
+            ) : (
+              <Link to="/auth">
+                <Button size="sm" variant="outline">
+                  <LogIn className="h-4 w-4 mr-2" />
+                  Login
+                </Button>
+              </Link>
+            )}
+            
             <button 
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="md:hidden p-2.5 rounded-full text-foreground/70 hover:text-primary hover:bg-secondary transition-colors duration-200"
@@ -117,6 +138,24 @@ const Navbar = () => {
                   {link.name}
                 </Link>
               ))}
+              
+              {!loading && !user && (
+                <Link
+                  to="/auth"
+                  className="block px-3 py-4 rounded-md text-base font-medium text-foreground hover:bg-gray-50 hover:text-primary transition-colors duration-200"
+                >
+                  Login / Sign Up
+                </Link>
+              )}
+              
+              {user && (
+                <Link
+                  to="/profile"
+                  className="block px-3 py-4 rounded-md text-base font-medium text-foreground hover:bg-gray-50 hover:text-primary transition-colors duration-200"
+                >
+                  My Profile
+                </Link>
+              )}
             </div>
           </div>
         )}
