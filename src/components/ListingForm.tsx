@@ -115,7 +115,7 @@ const ListingForm: React.FC<ListingFormProps> = ({ onSubmit }) => {
       1: ['name', 'type', 'price', 'address', 'city', 'state', 'zipCode', 'description'],
       2: ['roomType', 'bedrooms', 'bathrooms', 'genderPolicy', 'maxOccupancy', 'roomSize'],
       3: ['amenities'],
-      5: ['contactName', 'contactEmail', 'contactPhone', 'termsAccepted']
+      6: ['contactName', 'contactEmail', 'contactPhone', 'termsAccepted']
     };
 
     const currentFields = fieldsToValidate[currentStep];
