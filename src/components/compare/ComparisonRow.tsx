@@ -44,9 +44,11 @@ const ComparisonRow: React.FC<ComparisonRowProps> = ({
         return (
           <td 
             key={property.id} 
-            className={`p-4 border-b border-gray-100 text-center ${getCellBackground()}`}
+            className={`p-4 border-b border-gray-100 text-center align-middle ${getCellBackground()}`}
           >
-            {valueType === 'boolean' ? renderBooleanValue(value) : value}
+            <div className="flex items-center justify-center w-full h-full">
+              {valueType === 'boolean' ? renderBooleanValue(value) : value}
+            </div>
           </td>
         );
       })}
