@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { MapPin, Star, CheckCircle, Wifi, Dumbbell, Book, Lock, Utensils } from 'lucide-react';
@@ -30,9 +31,15 @@ const PropertyDetail = () => {
             *,
             property_locations(*),
             room_details(*),
-            contact_info(*)
+            contact_info(*),
+            property_photos(*),
+            property_amenities(amenity_id, amenities(name)),
+            property_rules(rule),
+            nearby_places(place_name, distance),
+            food_menu(day_of_week, breakfast, lunch, dinner)
           `)
           .eq('id', id)
+          .eq('status', 'approved') // Only show approved properties
           .single();
 
         if (error) {
@@ -40,6 +47,19 @@ const PropertyDetail = () => {
         }
 
         if (data) {
+          // Create food menu object from array
+          const foodMenuData: any = {};
+          if (data.food_menu && data.food_menu.length > 0) {
+            data.food_menu.forEach((menu: any) => {
+              const day = menu.day_of_week.toLowerCase();
+              foodMenuData[day] = {
+                breakfast: menu.breakfast ? [menu.breakfast] : [],
+                lunch: menu.lunch ? [menu.lunch] : [],
+                dinner: menu.dinner ? [menu.dinner] : [],
+              };
+            });
+          }
+
           // Transform the data to match the Property interface
           const transformedProperty: Property = {
             id: data.id,
@@ -48,37 +68,38 @@ const PropertyDetail = () => {
             type: data.type,
             price: data.price,
             location: {
-              address: data.property_locations[0].address,
-              city: data.property_locations[0].city,
-              state: data.property_locations[0].state,
-              zipCode: data.property_locations[0].zip_code,
+              address: data.property_locations[0]?.address || '',
+              city: data.property_locations[0]?.city || '',
+              state: data.property_locations[0]?.state || '',
+              zipCode: data.property_locations[0]?.zip_code || '',
               coordinates: [
-                data.property_locations[0].latitude,
-                data.property_locations[0].longitude,
-              ],
+                data.property_locations[0]?.latitude || 0,
+                data.property_locations[0]?.longitude || 0,
+              ] as [number, number],
             },
             roomDetails: {
-              roomType: data.room_details[0].room_type,
-              bedrooms: data.room_details[0].bedrooms,
-              bathrooms: data.room_details[0].bathrooms,
-              genderPolicy: data.room_details[0].gender_policy,
-              maxOccupancy: data.room_details[0].max_occupancy,
-              roomSize: data.room_details[0].room_size,
+              roomType: data.room_details[0]?.room_type || 'private',
+              bedrooms: data.room_details[0]?.bedrooms || 1,
+              bathrooms: data.room_details[0]?.bathrooms || 1,
+              genderPolicy: data.room_details[0]?.gender_policy || 'co-ed',
+              maxOccupancy: data.room_details[0]?.max_occupancy || 1,
+              roomSize: data.room_details[0]?.room_size || 100,
             },
-            amenities: data.amenities || [],
-            rules: data.rules || [],
-            photos: data.photos || [],
+            amenities: data.property_amenities?.map((pa: any) => pa.amenities?.name).filter(Boolean) || [],
+            rules: data.property_rules?.map((pr: any) => pr.rule) || [],
+            photos: data.property_photos?.map((pp: any) => pp.url) || ['/placeholder.svg'],
             rating: data.rating,
             reviews: data.reviews,
             distanceToLandmark: data.distance_to_landmark,
-            nearbyPlaces: data.nearby_places,
-            foodMenu: data.food_menu,
+            nearbyPlaces: data.nearby_places?.map((np: any) => np.place_name) || [],
+            foodMenu: Object.keys(foodMenuData).length > 0 ? foodMenuData : undefined,
             contactInfo: {
-              name: data.contact_info[0].name,
-              email: data.contact_info[0].email,
-              phone: data.contact_info[0].phone,
+              name: data.contact_info[0]?.name || '',
+              email: data.contact_info[0]?.email || '',
+              phone: data.contact_info[0]?.phone || '',
+              responseTime: data.contact_info[0]?.response_time,
             },
-            availability: data.availability,
+            availability: data.availability ? new Date(data.availability) : undefined,
             featured: data.featured,
           };
           setProperty(transformedProperty);
@@ -183,13 +204,15 @@ const PropertyDetail = () => {
             </div>
 
             {/* Amenities */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mt-8">
-              <h3 className="text-xl font-semibold mb-4">
-                <CheckCircle className="h-6 w-6 mr-2 inline-block align-middle text-primary" />
-                Amenities
-              </h3>
-              <AmenitiesList amenities={property.amenities} showAll={true} />
-            </div>
+            {property.amenities && property.amenities.length > 0 && (
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mt-8">
+                <h3 className="text-xl font-semibold mb-4">
+                  <CheckCircle className="h-6 w-6 mr-2 inline-block align-middle text-primary" />
+                  Amenities
+                </h3>
+                <AmenitiesList amenities={property.amenities} showAll={true} />
+              </div>
+            )}
 
             {/* Food Menu */}
             {property.foodMenu && (

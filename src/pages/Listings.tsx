@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import PropertyCard from '../components/PropertyCard';
@@ -12,11 +13,11 @@ const Listings = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [propertyLocation, setPropertyLocation] = useState('');
   const [filters, setFilters] = useState({
-    priceRange: [0, 100000],
+    priceRange: { min: 0, max: 10000 },
     roomTypes: [],
-    genderPolicy: [],
-    amenities: [],
-    location: '',
+    genderPolicies: [],
+    propertyTypes: [],
+    amenities: []
   });
 
   useEffect(() => {
@@ -26,7 +27,7 @@ const Listings = () => {
       setPropertyLocation(location.state.location || '');
     }
     fetchProperties();
-  }, [location.state]);
+  }, [location.state, filters]);
 
   const fetchProperties = async () => {
     setLoading(true);
@@ -37,7 +38,10 @@ const Listings = () => {
           *,
           property_locations(*),
           room_details(*),
-          contact_info(*)
+          contact_info(*),
+          property_photos(*),
+          property_amenities(amenity_id, amenities(name)),
+          property_rules(rule)
         `)
         .eq('status', 'approved'); // Only fetch approved properties
 
@@ -51,15 +55,14 @@ const Listings = () => {
 
       // Apply filters
       if (filters.priceRange) {
-        query = query.gte('price', filters.priceRange[0]).lte('price', filters.priceRange[1]);
+        query = query.gte('price', filters.priceRange.min).lte('price', filters.priceRange.max);
       }
       if (filters.roomTypes && filters.roomTypes.length > 0) {
         query = query.in('room_details.room_type', filters.roomTypes);
       }
-      if (filters.genderPolicy && filters.genderPolicy.length > 0) {
-        query = query.in('room_details.gender_policy', filters.genderPolicy);
+      if (filters.genderPolicies && filters.genderPolicies.length > 0) {
+        query = query.in('room_details.gender_policy', filters.genderPolicies);
       }
-      // Add more filters as needed
 
       const { data, error } = await query;
 
@@ -77,7 +80,10 @@ const Listings = () => {
           city: property.property_locations[0]?.city || '',
           state: property.property_locations[0]?.state || '',
           zipCode: property.property_locations[0]?.zip_code || '',
-          coordinates: [0, 0], // You might need to fetch coordinates separately
+          coordinates: [
+            property.property_locations[0]?.latitude || 0, 
+            property.property_locations[0]?.longitude || 0
+          ] as [number, number],
         },
         roomDetails: {
           roomType: property.room_details[0]?.room_type || 'private',
@@ -87,14 +93,17 @@ const Listings = () => {
           maxOccupancy: property.room_details[0]?.max_occupancy || 1,
           roomSize: property.room_details[0]?.room_size || 100,
         },
-        amenities: [], // Replace with actual amenities data if available
-        rules: [], // Replace with actual rules data if available
-        photos: [], // Replace with actual photos data if available
+        amenities: property.property_amenities?.map((pa: any) => pa.amenities?.name).filter(Boolean) || [],
+        rules: property.property_rules?.map((pr: any) => pr.rule) || [],
+        photos: property.property_photos?.map((pp: any) => pp.url) || ['/placeholder.svg'],
         contactInfo: {
           name: property.contact_info[0]?.name || '',
           email: property.contact_info[0]?.email || '',
           phone: property.contact_info[0]?.phone || '',
         },
+        rating: property.rating,
+        reviews: property.reviews,
+        featured: property.featured,
       }));
 
       setProperties(mappedProperties);
@@ -115,7 +124,10 @@ const Listings = () => {
         <div className="flex flex-col lg:flex-row gap-8">
           <aside className="w-full lg:w-80 flex-shrink-0">
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 sticky top-24">
-              <PropertyFilters onFilterChange={handleFiltersChange} />
+              <PropertyFilters 
+                onFilterChange={handleFiltersChange} 
+                activeFilters={filters}
+              />
             </div>
           </aside>
 

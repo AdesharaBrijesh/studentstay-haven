@@ -3,7 +3,7 @@ export interface Property {
   id: string;
   name: string;
   description: string;
-  type: 'pg' | 'hostel' | 'shared-apartment' | 'single-room' | 'dormitory';
+  type: 'pg' | 'hostel' | 'shared-apartment' | 'single-room' | 'dormitory' | 'student-housing' | 'shared-house';
   price: number;
   location: {
     address: string;
