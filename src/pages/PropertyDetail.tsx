@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { MapPin, Star, CheckCircle, Wifi, Dumbbell, Book, Lock, Utensils } from 'lucide-react';
@@ -99,7 +98,6 @@ const PropertyDetail = () => {
               phone: data.contact_info[0]?.phone || '',
               responseTime: data.contact_info[0]?.response_time,
             },
-            availability: data.availability ? new Date(data.availability) : undefined,
             featured: data.featured,
           };
           setProperty(transformedProperty);
