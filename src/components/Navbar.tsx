@@ -1,166 +1,215 @@
 
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import { Home, User, Search, Menu, X, LogIn } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Link, useNavigate } from 'react-router-dom';
+import { Home, Menu, X, User, LogOut, Bell } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 const Navbar = () => {
-  const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const location = useLocation();
-  const { user, loading } = useAuth();
+  const [unreadCount, setUnreadCount] = useState(0);
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 10) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
-    };
+    if (user) {
+      fetchUnreadNotifications();
+      
+      // Subscribe to notification changes
+      const channel = supabase
+        .channel('notifications-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'notifications',
+            filter: `user_id=eq.${user.id}`
+          },
+          () => {
+            fetchUnreadNotifications();
+          }
+        )
+        .subscribe();
 
-    window.addEventListener('scroll', handleScroll);
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [user]);
 
-  // Close mobile menu when changing routes
-  useEffect(() => {
-    setIsMenuOpen(false);
-  }, [location.pathname]);
-
-  const navLinks = [
-    { name: 'Home', path: '/' },
-    { name: 'Listings', path: '/listings' },
-    { name: 'Add Listing', path: '/add-listing' },
-    { name: 'Contact', path: '/contact' }
-  ];
-
-  const isActive = (path: string) => {
-    if (path === '/' && location.pathname === '/') return true;
-    if (path !== '/' && location.pathname.startsWith(path)) return true;
-    return false;
+  const fetchUnreadNotifications = async () => {
+    if (!user) return;
+    
+    try {
+      const { count } = await supabase
+        .from('notifications')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('read', false);
+      
+      setUnreadCount(count || 0);
+    } catch (error) {
+      console.error('Error fetching unread notifications:', error);
+    }
   };
 
-  // Don't render navbar on auth page
-  if (location.pathname === '/auth') {
-    return null;
-  }
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+    setIsMenuOpen(false);
+  };
+
+  const closeMenu = () => setIsMenuOpen(false);
 
   return (
-    <header 
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-white/90 backdrop-blur-md shadow-subtle' : 'bg-transparent'
-      }`}
-    >
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-100 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 md:h-20">
+        <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link 
-            to="/" 
-            className="flex items-center space-x-3 transition-opacity duration-300 hover:opacity-80"
-          >
+          <Link to="/" className="flex items-center space-x-3" onClick={closeMenu}>
             <Home className="h-6 w-6 text-primary" />
-            <span className="text-xl font-medium bg-clip-text text-foreground">
-              StudentStay
-            </span>
+            <span className="text-xl font-medium">StudentStay</span>
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
-            {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                className={`relative text-sm font-medium transition-colors duration-200 px-1 py-2 hover:text-primary ${
-                  isActive(link.path) 
-                    ? 'text-primary after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-primary after:rounded-full' 
-                    : 'text-foreground/80'
-                }`}
-              >
-                {link.name}
-              </Link>
-            ))}
-          </nav>
-
-          {/* Right side buttons */}
-          <div className="flex items-center space-x-4">
-            <Link 
-              to="/listings" 
-              className="hidden md:flex items-center p-2.5 rounded-full text-foreground/70 hover:text-primary hover:bg-secondary transition-colors duration-200"
-            >
-              <Search className="h-5 w-5" />
+          <div className="hidden md:flex items-center space-x-8">
+            <Link to="/" className="text-muted-foreground hover:text-primary transition-colors">
+              Home
             </Link>
-            
-            {loading ? (
-              <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse" />
-            ) : user ? (
-              <Link 
-                to="/profile" 
-                className="flex items-center p-2.5 rounded-full text-foreground/70 hover:text-primary hover:bg-secondary transition-colors duration-200"
-              >
-                <User className="h-5 w-5" />
-              </Link>
-            ) : (
-              <Link to="/auth">
-                <Button size="sm" variant="outline">
-                  <LogIn className="h-4 w-4 mr-2" />
-                  Login
-                </Button>
-              </Link>
-            )}
-            
-            <button 
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-2.5 rounded-full text-foreground/70 hover:text-primary hover:bg-secondary transition-colors duration-200"
-            >
-              {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </button>
+            <Link to="/listings" className="text-muted-foreground hover:text-primary transition-colors">
+              Listings
+            </Link>
+            <Link to="/add-listing" className="text-muted-foreground hover:text-primary transition-colors">
+              Add Listing
+            </Link>
           </div>
-        </div>
 
-        {/* Mobile Menu */}
-        {isMenuOpen && (
-          <div className="md:hidden bg-white/95 backdrop-blur-md border-t border-gray-100 animate-slide-down">
-            <div className="px-2 pt-2 pb-4 space-y-1">
-              {navLinks.map((link) => (
+          {/* Desktop Auth Actions */}
+          <div className="hidden md:flex items-center space-x-4">
+            {user ? (
+              <>
                 <Link
-                  key={link.path}
-                  to={link.path}
-                  className={`block px-3 py-4 rounded-md text-base font-medium transition-colors duration-200 ${
-                    isActive(link.path) 
-                      ? 'text-primary bg-primary/5' 
-                      : 'text-foreground hover:bg-gray-50 hover:text-primary'
-                  }`}
+                  to="/notifications"
+                  className="relative p-2 text-muted-foreground hover:text-primary transition-colors"
                 >
-                  {link.name}
+                  <Bell className="h-5 w-5" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
                 </Link>
-              ))}
-              
-              {!loading && !user && (
-                <Link
-                  to="/auth"
-                  className="block px-3 py-4 rounded-md text-base font-medium text-foreground hover:bg-gray-50 hover:text-primary transition-colors duration-200"
-                >
-                  Login / Sign Up
-                </Link>
-              )}
-              
-              {user && (
                 <Link
                   to="/profile"
-                  className="block px-3 py-4 rounded-md text-base font-medium text-foreground hover:bg-gray-50 hover:text-primary transition-colors duration-200"
+                  className="flex items-center space-x-2 text-muted-foreground hover:text-primary transition-colors"
                 >
-                  My Profile
+                  <User className="h-5 w-5" />
+                  <span>Profile</span>
+                </Link>
+                <button
+                  onClick={handleSignOut}
+                  className="flex items-center space-x-2 text-muted-foreground hover:text-primary transition-colors"
+                >
+                  <LogOut className="h-5 w-5" />
+                  <span>Sign Out</span>
+                </button>
+              </>
+            ) : (
+              <Link
+                to="/auth"
+                className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors"
+              >
+                Sign In
+              </Link>
+            )}
+          </div>
+
+          {/* Mobile menu button */}
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            aria-label="Toggle menu"
+          >
+            {isMenuOpen ? (
+              <X className="h-5 w-5 text-gray-600" />
+            ) : (
+              <Menu className="h-5 w-5 text-gray-600" />
+            )}
+          </button>
+        </div>
+
+        {/* Mobile Navigation */}
+        {isMenuOpen && (
+          <div className="md:hidden border-t border-gray-100 py-4">
+            <div className="flex flex-col space-y-4">
+              <Link
+                to="/"
+                className="text-muted-foreground hover:text-primary transition-colors py-2"
+                onClick={closeMenu}
+              >
+                Home
+              </Link>
+              <Link
+                to="/listings"
+                className="text-muted-foreground hover:text-primary transition-colors py-2"
+                onClick={closeMenu}
+              >
+                Listings
+              </Link>
+              <Link
+                to="/add-listing"
+                className="text-muted-foreground hover:text-primary transition-colors py-2"
+                onClick={closeMenu}
+              >
+                Add Listing
+              </Link>
+              
+              {user ? (
+                <>
+                  <Link
+                    to="/notifications"
+                    className="flex items-center space-x-2 text-muted-foreground hover:text-primary transition-colors py-2"
+                    onClick={closeMenu}
+                  >
+                    <Bell className="h-5 w-5" />
+                    <span>Notifications</span>
+                    {unreadCount > 0 && (
+                      <span className="bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                        {unreadCount > 9 ? '9+' : unreadCount}
+                      </span>
+                    )}
+                  </Link>
+                  <Link
+                    to="/profile"
+                    className="flex items-center space-x-2 text-muted-foreground hover:text-primary transition-colors py-2"
+                    onClick={closeMenu}
+                  >
+                    <User className="h-5 w-5" />
+                    <span>Profile</span>
+                  </Link>
+                  <button
+                    onClick={handleSignOut}
+                    className="flex items-center space-x-2 text-muted-foreground hover:text-primary transition-colors py-2 text-left"
+                  >
+                    <LogOut className="h-5 w-5" />
+                    <span>Sign Out</span>
+                  </button>
+                </>
+              ) : (
+                <Link
+                  to="/auth"
+                  className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors text-center"
+                  onClick={closeMenu}
+                >
+                  Sign In
                 </Link>
               )}
             </div>
           </div>
         )}
       </div>
-    </header>
+    </nav>
   );
 };
 

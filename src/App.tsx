@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
@@ -15,6 +14,7 @@ import CompareDrawer from './components/CompareDrawer';
 import { CompareProvider } from './lib/CompareContext';
 import { GitCompare } from 'lucide-react';
 import { Toaster } from 'sonner';
+import Notifications from './pages/Notifications';
 
 function App() {
   const [showCompareDrawer, setShowCompareDrawer] = useState(false);
@@ -32,6 +32,7 @@ function App() {
             <Route path="/compare" element={<Compare />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/notifications" element={<Notifications />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           
