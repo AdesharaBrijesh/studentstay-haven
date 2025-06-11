@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Home, Menu, X, User, LogOut, Bell } from 'lucide-react';
+import { Home, Menu, X, User, Bell, Search } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -89,6 +89,9 @@ const Navbar = () => {
           <div className="hidden md:flex items-center space-x-4">
             {user ? (
               <>
+                <button className="p-2 text-muted-foreground hover:text-primary transition-colors">
+                  <Search className="h-5 w-5" />
+                </button>
                 <Link
                   to="/notifications"
                   className="relative p-2 text-muted-foreground hover:text-primary transition-colors"
@@ -102,18 +105,10 @@ const Navbar = () => {
                 </Link>
                 <Link
                   to="/profile"
-                  className="flex items-center space-x-2 text-muted-foreground hover:text-primary transition-colors"
+                  className="p-2 text-muted-foreground hover:text-primary transition-colors"
                 >
                   <User className="h-5 w-5" />
-                  <span>Profile</span>
                 </Link>
-                <button
-                  onClick={handleSignOut}
-                  className="flex items-center space-x-2 text-muted-foreground hover:text-primary transition-colors"
-                >
-                  <LogOut className="h-5 w-5" />
-                  <span>Sign Out</span>
-                </button>
               </>
             ) : (
               <Link
@@ -167,6 +162,10 @@ const Navbar = () => {
               
               {user ? (
                 <>
+                  <button className="flex items-center space-x-2 text-muted-foreground hover:text-primary transition-colors py-2 text-left">
+                    <Search className="h-5 w-5" />
+                    <span>Search</span>
+                  </button>
                   <Link
                     to="/notifications"
                     className="flex items-center space-x-2 text-muted-foreground hover:text-primary transition-colors py-2"
@@ -188,13 +187,6 @@ const Navbar = () => {
                     <User className="h-5 w-5" />
                     <span>Profile</span>
                   </Link>
-                  <button
-                    onClick={handleSignOut}
-                    className="flex items-center space-x-2 text-muted-foreground hover:text-primary transition-colors py-2 text-left"
-                  >
-                    <LogOut className="h-5 w-5" />
-                    <span>Sign Out</span>
-                  </button>
                 </>
               ) : (
                 <Link
